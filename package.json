@@ -1,0 +1,22 @@
+{
+  "name": "merchant_desktop_app",
+  "version": "1.0.0",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "concurrently -k \"npm --prefix renderer run dev\" \"wait-on http://localhost:5173 && electronmon .\"",
+    "build:ui": "npm --prefix renderer run build",
+    "dist": "npm run build:ui && electron-builder"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "electron": "^40.0.0",
+    "electron-builder": "^26.4.0",
+    "electronmon": "^2.0.4",
+    "wait-on": "^9.0.3"
+  }
+}
