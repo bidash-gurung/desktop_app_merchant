@@ -401,6 +401,11 @@ export default function HomeItemsGrid({ session }) {
         isMart={isMart}
         session={session}
         onUpdated={handleUpdated}
+        onDeleted={(id) => {
+          setItems((prev) => prev.filter((x) => String(x?.id) !== String(id)));
+          setSelected(null);
+          setOpen(false);
+        }}
       />
     </div>
   );

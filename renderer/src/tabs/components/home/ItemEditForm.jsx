@@ -1,10 +1,15 @@
-// tabs/components/home/ItemEditForm.jsx
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import "./css/itemEditForm.css";
+import React from "react";
+import "./css/itemModal.css";
 
-const MART_EDIT = import.meta.env.VITE_ITEM_EDIT;
-const FOOD_EDIT = import.meta.env.VITE_FOOD_MENU_EDIT;
-const CATEGORY_ENDPOINT = import.meta.env.VITE_CATEGORY_ENDPOINT;
+const CATEGORY_ENDPOINT = import.meta.env.VITE_CATEGORY_ENDPOINT; // .../category/business/{business_id}
+const FOOD_EDIT = import.meta.env.VITE_FOOD_MENU_EDIT; // .../food-menu/{id}
+const MART_EDIT = import.meta.env.VITE_ITEM_EDIT; // .../mart-menu/{id}
+
+function buildUrl(base, id) {
+  if (!base) return "";
+  if (base.includes("{id}")) return base.replace("{id}", String(id));
+  return base.endsWith("/") ? `${base}${id}` : `${base}/${id}`;
+}
 
 async function safeJson(res) {
   try {
@@ -13,35 +18,10 @@ async function safeJson(res) {
     return null;
   }
 }
-
-function msg(payload) {
+function extractMessage(payload) {
   if (!payload) return "";
   if (typeof payload === "string") return payload;
   return payload.message || payload.error || payload.msg || "";
-}
-
-function buildUrl(base, id) {
-  if (!base) return "";
-  if (base.includes("{id}")) return base.replace("{id}", String(id));
-  return base.endsWith("/") ? `${base}${id}` : `${base}/${id}`;
-}
-
-function buildBizUrl(base, businessId) {
-  if (!base) return "";
-  if (base.includes("{business_id}"))
-    return base.replace("{business_id}", String(businessId));
-  return base.endsWith("/") ? `${base}${businessId}` : `${base}/${businessId}`;
-}
-
-function toNumberOrNull(v) {
-  const s = String(v ?? "").trim();
-  if (!s) return null;
-  const n = Number(s);
-  return Number.isFinite(n) ? n : null;
-}
-
-function uniq(arr) {
-  return Array.from(new Set(arr.filter(Boolean)));
 }
 
 export default function ItemEditForm({
@@ -50,94 +30,63 @@ export default function ItemEditForm({
   session,
   onCancel,
   onSaved,
+  onImagePreviewChange,
 }) {
-  const [saving, setSaving] = useState(false);
-  const [err, setErr] = useState("");
+  const fileRef = React.useRef(null);
 
-  const [catLoading, setCatLoading] = useState(false);
-  const [catErr, setCatErr] = useState("");
-  const [categories, setCategories] = useState([]);
-
-  const abortRef = useRef(null);
-
-  const user = useMemo(() => {
-    return session?.payload?.user || session?.payload?.data?.user || {};
-  }, [session]);
-
+  const payload = session?.payload || session || {};
+  const user = payload?.user || payload?.data?.user || {};
   const businessId = user?.business_id ?? null;
 
   const token =
-    session?.payload?.token?.access_token ||
-    session?.payload?.data?.token?.access_token ||
-    session?.payload?.access_token ||
-    session?.payload?.data?.access_token ||
+    payload?.token?.access_token ||
+    payload?.data?.token?.access_token ||
+    payload?.access_token ||
+    payload?.data?.access_token ||
     null;
 
-  const editBase = isMart ? MART_EDIT : FOOD_EDIT;
+  const endpointBase = isMart ? MART_EDIT : FOOD_EDIT;
 
-  const initial = useMemo(() => {
-    const it = item || {};
-    const hasVeg = it?.is_veg != null;
-    const hasSpice = it?.spice_level != null;
+  const [catLoading, setCatLoading] = React.useState(false);
+  const [catErr, setCatErr] = React.useState("");
+  const [categories, setCategories] = React.useState([]);
 
-    // spice default mapping
-    const rawSpice = String(it.spice_level ?? "").trim();
-    const rawLower = rawSpice.toLowerCase();
+  const [itemName, setItemName] = React.useState(item?.item_name || "");
+  const [description, setDescription] = React.useState(item?.description || "");
+  const [categoryId, setCategoryId] = React.useState(item?.category_id || "");
 
-    let spiceUI = "";
-    if (hasSpice) {
-      if (!rawSpice || rawLower === "none") spiceUI = "None";
-      else if (rawLower === "mild") spiceUI = "Low";
-      else if (rawLower === "hot") spiceUI = "High";
-      else if (rawLower === "low") spiceUI = "Low";
-      else if (rawLower === "medium") spiceUI = "Medium";
-      else if (rawLower === "high") spiceUI = "High";
-      else spiceUI = "Medium";
-    }
+  const [price, setPrice] = React.useState(item?.actual_price ?? "");
+  const [discount, setDiscount] = React.useState(item?.discount_percentage ?? "");
+  const [taxRate, setTaxRate] = React.useState(item?.tax_rate ?? "");
+  const [stock, setStock] = React.useState(item?.stock_limit ?? "");
 
-    const sortUI =
-      it?.sort_order != null && String(it.sort_order).trim() !== ""
-        ? String(it.sort_order)
-        : "1";
+  const [sortOrder, setSortOrder] = React.useState(
+    item?.sort_order != null ? String(item.sort_order) : "1",
+  );
 
-    return {
-      item_name: it.item_name || "",
-      category_name: it.category_name || "",
-      description: it.description || "",
+  const [availability, setAvailability] = React.useState(
+    Number(item?.is_available) === 1 ? "1" : "0",
+  );
 
-      actual_price: it.actual_price ?? "",
-      discount_percentage: it.discount_percentage ?? "",
-      tax_rate: it.tax_rate ?? "",
-      stock_limit: it.stock_limit ?? "",
+  const [veg, setVeg] = React.useState(
+    item?.is_veg == null ? "" : Number(item.is_veg) === 1 ? "1" : "0",
+  );
 
-      // ✅ dropdown now
-      sort_order: sortUI, // "1" | "2" | "3"
+  const spiceInit =
+    item?.spice_level != null && String(item.spice_level).trim() !== ""
+      ? String(item.spice_level)
+      : "None";
+  const [spiceLevel, setSpiceLevel] = React.useState(spiceInit);
 
-      is_available: Number(it.is_available) === 1,
+  const [imageFile, setImageFile] = React.useState(null);
 
-      // ✅ dropdowns
-      diet: hasVeg ? (Number(it.is_veg) === 1 ? "veg" : "nonveg") : "",
-      spice: spiceUI, // "None" | "Low" | "Medium" | "High" | ""
+  const [saving, setSaving] = React.useState(false);
+  const [err, setErr] = React.useState("");
 
-      _hasVeg: hasVeg,
-      _hasSpice: hasSpice,
-    };
-  }, [item]);
-
-  const [form, setForm] = useState(initial);
-
-  useEffect(() => {
-    setForm(initial);
-    setErr("");
-  }, [initial]);
-
-  function setField(k, v) {
-    setForm((s) => ({ ...s, [k]: v }));
-  }
-
-  // ✅ fetch categories
-  useEffect(() => {
+  // categories
+  React.useEffect(() => {
     let alive = true;
+    const ctrl = new AbortController();
 
     async function loadCats() {
       setCatErr("");
@@ -152,11 +101,7 @@ export default function ItemEditForm({
         return;
       }
 
-      if (abortRef.current) abortRef.current.abort();
-      const ctrl = new AbortController();
-      abortRef.current = ctrl;
-
-      const url = buildBizUrl(CATEGORY_ENDPOINT, businessId);
+      const url = CATEGORY_ENDPOINT.replace("{business_id}", String(businessId));
 
       setCatLoading(true);
       try {
@@ -169,320 +114,277 @@ export default function ItemEditForm({
           signal: ctrl.signal,
         });
 
-        const payload = await safeJson(res);
+        const out = await safeJson(res);
 
         if (!res.ok) {
-          if (alive) {
-            setCatErr(msg(payload) || `Category fetch failed (${res.status})`);
-          }
+          if (!alive) return;
+          setCatErr(extractMessage(out) || `Category fetch failed (${res.status})`);
           return;
         }
 
-        const types = Array.isArray(payload?.types) ? payload.types : [];
-        const kindWanted = isMart ? "mart" : "food";
-
-        const names = types
-          .filter((t) => {
-            const k = String(t?.kind || "").toLowerCase();
-            return k ? k === kindWanted : true;
-          })
-          .flatMap((t) => (Array.isArray(t?.categories) ? t.categories : []))
-          .map((c) => String(c?.category_name || "").trim());
-
-        const uniqueNames = uniq(names);
-
-        if (alive) {
-          setCategories(uniqueNames);
-
-          setForm((prev) => {
-            if (String(prev.category_name || "").trim()) return prev;
-            if (uniqueNames.length === 0) return prev;
-            return { ...prev, category_name: uniqueNames[0] };
+        const types = out?.types || out?.data?.types || [];
+        const flat = [];
+        (Array.isArray(types) ? types : []).forEach((t) => {
+          const cats = t?.categories || [];
+          (Array.isArray(cats) ? cats : []).forEach((c) => {
+            if (c?.id && c?.category_name) flat.push({ id: c.id, category_name: c.category_name });
           });
+        });
+
+        const byId = new Map();
+        flat.forEach((c) => byId.set(String(c.id), c));
+        const list = Array.from(byId.values()).sort((a, b) =>
+          String(a.category_name).localeCompare(String(b.category_name)),
+        );
+
+        if (!alive) return;
+        setCategories(list);
+
+        if (!categoryId && item?.category_name) {
+          const found = list.find(
+            (x) => String(x.category_name).toLowerCase() === String(item.category_name).toLowerCase(),
+          );
+          if (found) setCategoryId(String(found.id));
         }
       } catch (e) {
-        if (alive && e?.name !== "AbortError") {
-          setCatErr(e?.message || "Category network error");
-        }
+        if (!alive) return;
+        if (e?.name === "AbortError") return;
+        setCatErr(e?.message || "Category network error");
       } finally {
-        if (alive) {
-          setCatLoading(false);
-        }
+        if (alive) setCatLoading(false);
       }
     }
 
     loadCats();
     return () => {
       alive = false;
-      if (abortRef.current) abortRef.current.abort();
+      ctrl.abort();
     };
-  }, [businessId, token, isMart]);
+  }, [businessId, token, categoryId, item?.category_name]);
 
-  function dietToIsVeg(diet) {
-    if (diet === "veg") return 1;
-    if (diet === "nonveg") return 0;
-    return null;
-  }
-
-  function spiceToBackend(spice) {
-    const s = String(spice || "").trim();
-    if (!s) return "";
-    const norm = s.toLowerCase();
-    if (norm === "none") return "None";
-    if (norm === "low") return "Low";
-    if (norm === "medium") return "Medium";
-    if (norm === "high") return "High";
-    return "Medium";
-  }
+  // image preview => left side
+  React.useEffect(() => {
+    if (!imageFile) {
+      onImagePreviewChange?.("");
+      return;
+    }
+    const url = URL.createObjectURL(imageFile);
+    onImagePreviewChange?.(url);
+    return () => URL.revokeObjectURL(url);
+  }, [imageFile, onImagePreviewChange]);
 
   async function onSubmit(e) {
     e.preventDefault();
     setErr("");
 
-    if (!editBase) {
-      setErr(
-        isMart
-          ? "Missing env: VITE_ITEM_EDIT"
-          : "Missing env: VITE_FOOD_MENU_EDIT",
-      );
-      return;
-    }
-    if (!item?.id) {
-      setErr("Missing item id.");
-      return;
-    }
-    if (!String(form.item_name).trim()) {
-      setErr("Item name is required.");
-      return;
-    }
+    const id = item?.id;
+    if (!id) return setErr("Missing item id.");
+    if (!endpointBase)
+      return setErr(isMart ? "Missing env: VITE_ITEM_EDIT" : "Missing env: VITE_FOOD_MENU_EDIT");
 
-    const url = buildUrl(editBase, item.id);
+    const nm = String(itemName || "").trim();
+    if (!nm) return setErr("Item name is required.");
+    if (!categoryId) return setErr("Category is required.");
 
-    const payload = {
-      item_name: String(form.item_name).trim(),
-      category_name: String(form.category_name || "").trim(),
-      description: String(form.description || "").trim(),
+    const url = buildUrl(endpointBase, id);
 
-      actual_price: toNumberOrNull(form.actual_price),
-      discount_percentage: toNumberOrNull(form.discount_percentage),
-      tax_rate: toNumberOrNull(form.tax_rate),
-      stock_limit: toNumberOrNull(form.stock_limit),
+    const fd = new FormData();
+    fd.append("item_name", nm);
+    fd.append("description", String(description || ""));
+    fd.append("category_id", String(categoryId));
+    fd.append("is_available", String(availability));
 
-      // ✅ dropdown 1/2/3
-      sort_order: toNumberOrNull(form.sort_order),
+    if (String(price).trim() !== "") fd.append("actual_price", String(price));
+    if (String(discount).trim() !== "") fd.append("discount_percentage", String(discount));
+    if (String(taxRate).trim() !== "") fd.append("tax_rate", String(taxRate));
+    if (String(stock).trim() !== "") fd.append("stock_limit", String(stock));
+    if (String(sortOrder).trim() !== "") fd.append("sort_order", String(sortOrder));
 
-      is_available: form.is_available ? 1 : 0,
-    };
+    fd.append("spice_level", String(spiceLevel || "None"));
+    if (veg !== "") fd.append("is_veg", String(veg));
 
-    if (form._hasVeg) {
-      const isVeg = dietToIsVeg(form.diet);
-      payload.is_veg = isVeg == null ? 0 : isVeg;
-    }
-    if (form._hasSpice) {
-      payload.spice_level = spiceToBackend(form.spice);
-    }
+    if (imageFile) fd.append("item_image", imageFile);
 
     setSaving(true);
     try {
       const res = await fetch(url, {
-        method: "PUT", // change to PATCH if needed
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify(payload),
+        method: "PUT",
+        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: fd,
       });
 
       const out = await safeJson(res);
-
       if (!res.ok) {
-        setErr(msg(out) || `Update failed (${res.status})`);
+        setErr(extractMessage(out) || `Update failed (${res.status})`);
         return;
       }
 
-      const updated = out?.data?.item || out?.data || out?.item || payload;
-      onSaved?.({ ...item, ...updated });
-    } catch (e2) {
-      setErr(e2?.message || "Network error");
+      const updated = out?.data || out?.item || out;
+      onSaved?.(updated || item);
+    } catch (e) {
+      setErr(e?.message || "Network error while saving.");
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <form className="ief" onSubmit={onSubmit}>
-      {err ? <div className="iefErr">{err}</div> : null}
+    <form className="imForm" onSubmit={onSubmit}>
+      {err ? <div className="imFormError">{err}</div> : null}
 
-      <div className="iefGrid">
-        <Field label="Item name" required>
-          <input
-            className="iefInput"
-            value={form.item_name}
-            onChange={(e) => setField("item_name", e.target.value)}
-            placeholder="Item name"
-          />
-        </Field>
-
-        <Field label="Category">
-          <div className="iefSelectWrap">
-            <select
-              className="iefSelect"
-              value={form.category_name}
-              onChange={(e) => setField("category_name", e.target.value)}
-              disabled={catLoading || categories.length === 0}
-            >
-              {catLoading ? (
-                <option value="">Loading categories…</option>
-              ) : categories.length === 0 ? (
-                <option value="">
-                  {catErr ? "No categories" : "No categories found"}
-                </option>
-              ) : (
-                categories.map((name) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))
-              )}
-            </select>
-          </div>
-
-          {catErr ? <div className="iefHint err">{catErr}</div> : null}
-        </Field>
-
-        {form._hasVeg ? (
-          <Field label="Diet">
-            <div className="iefSelectWrap">
-              <select
-                className="iefSelect"
-                value={form.diet}
-                onChange={(e) => setField("diet", e.target.value)}
-              >
-                <option value="nonveg">Non-veg</option>
-                <option value="veg">Veg</option>
-              </select>
-            </div>
-          </Field>
-        ) : null}
-
-        {form._hasSpice ? (
-          <Field label="Spice level">
-            <div className="iefSelectWrap">
-              <select
-                className="iefSelect"
-                value={form.spice}
-                onChange={(e) => setField("spice", e.target.value)}
-              >
-                <option value="None">None</option>
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-              </select>
-            </div>
-          </Field>
-        ) : null}
-
-        <Field label="Price (Nu.)">
-          <input
-            className="iefInput"
-            value={form.actual_price}
-            onChange={(e) => setField("actual_price", e.target.value)}
-            inputMode="decimal"
-            placeholder="0.00"
-          />
-        </Field>
-
-        <Field label="Stock limit">
-          <input
-            className="iefInput"
-            value={form.stock_limit}
-            onChange={(e) => setField("stock_limit", e.target.value)}
-            inputMode="numeric"
-            placeholder="0"
-          />
-        </Field>
-
-        <Field label="Discount (%)">
-          <input
-            className="iefInput"
-            value={form.discount_percentage}
-            onChange={(e) => setField("discount_percentage", e.target.value)}
-            inputMode="decimal"
-            placeholder="0"
-          />
-        </Field>
-
-        <Field label="Tax rate (%)">
-          <input
-            className="iefInput"
-            value={form.tax_rate}
-            onChange={(e) => setField("tax_rate", e.target.value)}
-            inputMode="decimal"
-            placeholder="0"
-          />
-        </Field>
-
-        {/* ✅ Sort order dropdown (1/2/3) */}
-        <Field label="Sort order">
-          <div className="iefSelectWrap">
-            <select
-              className="iefSelect"
-              value={form.sort_order}
-              onChange={(e) => setField("sort_order", e.target.value)}
-            >
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-            </select>
-          </div>
-        </Field>
-
-        <div className="iefToggleRow">
-          <label className="iefToggle">
-            <input
-              type="checkbox"
-              checked={!!form.is_available}
-              onChange={(e) => setField("is_available", e.target.checked)}
-            />
-            <span>Available</span>
-          </label>
+      <div className="imGrid">
+        <div className="imField imFieldFull">
+          <label className="imLabelSm">Item name</label>
+          <input className="imInput" value={itemName} onChange={(e) => setItemName(e.target.value)} />
         </div>
 
-        <Field label="Description" full>
-          <textarea
-            className="iefTextarea"
-            value={form.description}
-            onChange={(e) => setField("description", e.target.value)}
-            placeholder="Description"
-            rows={5}
+        <div className="imField imFieldFull">
+          <label className="imLabelSm">Category</label>
+          <select
+            className="imSelect"
+            value={String(categoryId || "")}
+            onChange={(e) => setCategoryId(e.target.value)}
+            disabled={catLoading}
+          >
+            <option value="">{catLoading ? "Loading categories..." : "Select category"}</option>
+            {categories.map((c) => (
+              <option key={c.id} value={String(c.id)}>
+                {c.category_name}
+              </option>
+            ))}
+          </select>
+          {catErr ? <div className="imHintErr">{catErr}</div> : null}
+        </div>
+
+        <div className="imField">
+          <label className="imLabelSm">Price</label>
+          <input className="imInput" value={price} onChange={(e) => setPrice(e.target.value)} />
+        </div>
+
+        <div className="imField">
+          <label className="imLabelSm">Tax rate (%)</label>
+          <input className="imInput" value={taxRate} onChange={(e) => setTaxRate(e.target.value)} />
+        </div>
+
+        <div className="imField">
+          <label className="imLabelSm">Discount (%)</label>
+          <input
+            className="imInput"
+            value={discount}
+            onChange={(e) => setDiscount(e.target.value)}
           />
-        </Field>
+        </div>
+
+        <div className="imField">
+          <label className="imLabelSm">Stock</label>
+          <input className="imInput" value={stock} onChange={(e) => setStock(e.target.value)} />
+        </div>
+
+        <div className="imField">
+          <label className="imLabelSm">Sort order</label>
+          <select className="imSelect" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </div>
+
+        <div className="imField">
+          <label className="imLabelSm">Availability</label>
+          <select
+            className="imSelect"
+            value={availability}
+            onChange={(e) => setAvailability(e.target.value)}
+          >
+            <option value="1">Available</option>
+            <option value="0">Unavailable</option>
+          </select>
+        </div>
+
+        <div className="imField">
+          <label className="imLabelSm">Veg / Non-veg</label>
+          <select className="imSelect" value={veg} onChange={(e) => setVeg(e.target.value)}>
+            <option value="">—</option>
+            <option value="1">Veg</option>
+            <option value="0">Non-veg</option>
+          </select>
+        </div>
+
+        <div className="imField">
+          <label className="imLabelSm">Spice level</label>
+          <select className="imSelect" value={spiceLevel} onChange={(e) => setSpiceLevel(e.target.value)}>
+            <option value="None">None</option>
+            <option value="Low">Low</option>
+            <option value="Mid">Mid</option>
+            <option value="High">High</option>
+          </select>
+        </div>
+
+        <div className="imField imFieldFull">
+          <label className="imLabelSm">Description</label>
+          <textarea
+            className="imTextarea"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={4}
+          />
+        </div>
+
+        {/* ✅ only button, no native file input UI */}
+        <div className="imField imFieldFull">
+          <label className="imLabelSm">Item image</label>
+
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="imFileHidden"
+            onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+          />
+
+          <div className="imUploadRow">
+            <button
+              type="button"
+              className="imBtn ghost"
+              onClick={() => fileRef.current?.click?.()}
+            >
+              Choose image
+            </button>
+
+            {imageFile ? (
+              <>
+                <div className="imFileName" title={imageFile.name}>
+                  {imageFile.name}
+                </div>
+                <button
+                  type="button"
+                  className="imBtn ghost"
+                  onClick={() => {
+                    setImageFile(null);
+                    onImagePreviewChange?.("");
+                    if (fileRef.current) fileRef.current.value = "";
+                  }}
+                >
+                  Remove
+                </button>
+              </>
+            ) : (
+              <div className="imFileName muted">No file chosen</div>
+            )}
+          </div>
+
+          <div className="imHint">Preview will appear on the left image automatically.</div>
+        </div>
       </div>
 
-      <div className="iefActions">
-        <button
-          type="button"
-          className="iefBtn ghost"
-          onClick={onCancel}
-          disabled={saving}
-        >
+      <div className="imFormActions">
+        <button type="button" className="imBtn ghost" onClick={onCancel} disabled={saving}>
           Cancel
         </button>
-        <button type="submit" className="iefBtn" disabled={saving}>
-          {saving ? "Saving…" : "Save changes"}
+        <button type="submit" className="imBtn" disabled={saving}>
+          {saving ? "Saving…" : "Save"}
         </button>
       </div>
     </form>
-  );
-}
-
-function Field({ label, required, children, full }) {
-  return (
-    <div className={`iefField ${full ? "full" : ""}`}>
-      <div className="iefLabel">
-        {label} {required ? <span className="iefReq">*</span> : null}
-      </div>
-      {children}
-    </div>
   );
 }
