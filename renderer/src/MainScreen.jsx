@@ -243,8 +243,29 @@ export default function MainScreen({ session, onLogout }) {
       <main className="main">
         {/* ✅ Top bar: center address, right = full name then bigger profile */}
         <header className="top">
-          <div className="topLeft" />
+          <div className="topLeft">
+            <div className="winBtns">
+              <button
+                type="button"
+                className="winBtn"
+                onClick={() => window.appWindow?.minimize?.()}
+                aria-label="Minimize"
+                title="Minimize"
+              >
+                —
+              </button>
 
+              <button
+                type="button"
+                className="winBtn close"
+                onClick={() => window.appWindow?.close?.()}
+                aria-label="Close"
+                title="Close"
+              >
+                ×
+              </button>
+            </div>
+          </div>
           <div className="topCenter" title={address}>
             {address ? (
               <div className="topAddress">

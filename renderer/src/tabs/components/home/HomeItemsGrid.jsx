@@ -1,10 +1,16 @@
 // tabs/components/home/HomeItemsGrid.jsx
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
 import ItemDetailsModal from "./ItemDetailsModal";
 import "./css/homeItemsGrid.css";
 
-const MART_ENDPOINT = import.meta.env.VITE_ITEM_ENDPOINT; // https://grab.newedge.bt/mart/api/mart-menu/{business_id}
-const FOOD_ENDPOINT = import.meta.env.VITE_DISPLAY_MENU_ENDPOINT; // https://grab.newedge.bt/food/api/food-menu/business/{business_id}
+const MART_ENDPOINT = import.meta.env.VITE_ITEM_ENDPOINT; // .../mart-menu/{business_id}
+const FOOD_ENDPOINT = import.meta.env.VITE_DISPLAY_MENU_ENDPOINT; // .../food-menu/business/{business_id}
 
 const FOOD_IMG_PREFIX = import.meta.env.VITE_MENU_IMAGE_ENDPOINT; // https://grab.newedge.bt/food
 const MART_IMG_PREFIX = import.meta.env.VITE_ITEM_IMAGE_ENDPOINT; // https://grab.newedge.bt/mart
@@ -36,6 +42,47 @@ function getMessage(payload) {
   return payload.message || payload.error || payload.msg || "";
 }
 
+/* ✅ PRICING RULE YOU WANT:
+   1) Start with actual_price
+   2) Add tax to get "taxed actual"
+   3) If discount exists, apply discount to the "taxed actual" (NOT to the base)
+*/
+function num(v) {
+  const x = Number(v);
+  return Number.isFinite(x) ? x : null;
+}
+function money2(v) {
+  const x = Number(v);
+  if (!Number.isFinite(x)) return "";
+  return x.toFixed(2);
+}
+function calcPricingTaxThenDiscount(it) {
+  const base = num(it?.actual_price);
+  if (base == null) return { hasBase: false };
+
+  const taxPct = Math.max(0, num(it?.tax_rate) ?? 0);
+  const discPct = Math.max(0, num(it?.discount_percentage) ?? 0);
+
+  const hasTax = taxPct > 0;
+  const hasDiscount = discPct > 0;
+
+  const taxedActual = hasTax ? base * (1 + taxPct / 100) : base;
+
+  // ✅ discount is applied to taxedActual
+  const discounted = hasDiscount ? taxedActual * (1 - discPct / 100) : null;
+
+  return {
+    hasBase: true,
+    base,
+    taxPct,
+    discPct,
+    hasTax,
+    hasDiscount,
+    taxedActual,
+    discounted,
+  };
+}
+
 export default function HomeItemsGrid({ session }) {
   const [q, setQ] = useState("");
   const [onlyAvailable, setOnlyAvailable] = useState(false);
@@ -54,7 +101,7 @@ export default function HomeItemsGrid({ session }) {
   }, [session]);
 
   const businessId = user?.business_id ?? null;
-  const ownerType = String(user?.owner_type || "").toLowerCase(); // "mart" | "food"
+  const ownerType = String(user?.owner_type || "").toLowerCase();
   const isMart = ownerType === "mart";
 
   const endpoint = isMart ? MART_ENDPOINT : FOOD_ENDPOINT;
@@ -118,9 +165,7 @@ export default function HomeItemsGrid({ session }) {
         }
 
         const data = payload?.data || [];
-        if (alive) {
-          setItems(Array.isArray(data) ? data : []);
-        }
+        if (alive) setItems(Array.isArray(data) ? data : []);
       } catch (e) {
         if (e?.name === "AbortError") return;
         if (alive) {
@@ -128,9 +173,7 @@ export default function HomeItemsGrid({ session }) {
           setItems([]);
         }
       } finally {
-        if (alive) {
-          setLoading(false);
-        }
+        if (alive) setLoading(false);
       }
     }
 
@@ -158,17 +201,21 @@ export default function HomeItemsGrid({ session }) {
     });
   }, [items, q, onlyAvailable]);
 
-  function onOpenItem(it) {
-    setSelected(it);
-    setOpen(true);
-  }
+  const onOpenItem = useCallback(
+    (it) => {
+      const imgUrl = it?.item_image ? joinUrl(imgPrefix, it.item_image) : "";
+      setSelected({ ...it, _imgUrl: imgUrl });
+      setOpen(true);
+    },
+    [imgPrefix],
+  );
 
-  function onClose() {
+  const onClose = useCallback(() => {
     setOpen(false);
     setSelected(null);
-  }
+  }, []);
 
-  function handleUpdated(updatedItem) {
+  const handleUpdated = useCallback((updatedItem) => {
     if (!updatedItem?.id) return;
 
     setItems((prev) =>
@@ -176,13 +223,13 @@ export default function HomeItemsGrid({ session }) {
         String(x?.id) === String(updatedItem.id) ? updatedItem : x,
       ),
     );
-    setSelected(updatedItem);
-  }
+    setSelected((prev) => (prev ? { ...prev, ...updatedItem } : updatedItem));
+  }, []);
 
   return (
     <div className="homeItemsWrap">
       <div className="homeItemsHeader">
-        <div>
+        <div className="homeItemsHeadLeft">
           <div className="homeItemsTitle">
             {isMart ? "Mart Items" : "Food Menu"}
           </div>
@@ -192,7 +239,7 @@ export default function HomeItemsGrid({ session }) {
         </div>
 
         <div className="homeItemsControls">
-          <div className="homeItemsSearch">
+          <div className="homeItemsSearch" role="search">
             <SearchIcon />
             <input
               value={q}
@@ -251,12 +298,9 @@ export default function HomeItemsGrid({ session }) {
             const key = it?.id ?? `${it?.item_name}-${it?.created_at ?? ""}`;
             const name = it?.item_name || "Item";
             const cat = it?.category_name || "";
-            const price =
-              it?.actual_price != null && String(it.actual_price) !== ""
-                ? String(it.actual_price)
-                : "";
             const desc = it?.description || "";
             const available = Number(it?.is_available) === 1;
+
             const stock =
               it?.stock_limit != null && String(it.stock_limit) !== ""
                 ? Number(it.stock_limit)
@@ -265,6 +309,8 @@ export default function HomeItemsGrid({ session }) {
             const imgUrl = it?.item_image
               ? joinUrl(imgPrefix, it.item_image)
               : "";
+
+            const p = calcPricingTaxThenDiscount(it);
 
             return (
               <button
@@ -291,8 +337,26 @@ export default function HomeItemsGrid({ session }) {
                     <div className="itemName" title={name}>
                       {name}
                     </div>
-                    {price ? (
-                      <div className="itemPrice">Nu. {price}</div>
+
+                    {p.hasBase ? (
+                      <div className="itemPrice" aria-label="Price">
+                        {p.hasDiscount ? (
+                          <span className="priceStack">
+                            {/* ✅ WAS: taxed actual */}
+                            <span className="priceWas">
+                              Nu. {money2(p.taxedActual)}
+                            </span>
+                            {/* ✅ NOW: discounted from taxed actual */}
+                            <span className="priceNow">
+                              Nu. {money2(p.discounted)}
+                            </span>
+                          </span>
+                        ) : (
+                          <span className="priceNow">
+                            Nu. {money2(p.taxedActual)}
+                          </span>
+                        )}
+                      </div>
                     ) : null}
                   </div>
 
@@ -302,12 +366,26 @@ export default function HomeItemsGrid({ session }) {
                     <div className="itemDesc" title={desc}>
                       {desc}
                     </div>
-                  ) : null}
+                  ) : (
+                    <div className="itemDesc empty">No description</div>
+                  )}
 
                   <div className="itemMetaRow">
                     <span className="chip">
                       Stock: {stock != null ? stock : "—"}
                     </span>
+
+                    {p.hasDiscount ? (
+                      <span className="chip chipAccent">
+                        Discount: {Math.round(p.discPct)}%
+                      </span>
+                    ) : null}
+
+                    {p.hasTax ? (
+                      <span className="chip chipTax">
+                        Tax: {Math.round(p.taxPct)}%
+                      </span>
+                    ) : null}
                   </div>
                 </div>
               </button>

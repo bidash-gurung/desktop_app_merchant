@@ -1,12 +1,5 @@
-/* ./tabs/components/home/css/homeItemsGrid.css */
-/* Works with your HomeItemsGrid.jsx classNames:
-   homeItemsWrap, homeItemsHeader, homeItemsHeadLeft, homeItemsTitle, homeItemsSub,
-   homeItemsControls, homeItemsSearch, homeItemsSearchInput, homeItemsClear,
-   homeItemsToggle, homeItemsChip, homeItemsError, homeItemsSkeletonGrid, itemSkel*,
-   homeItemsEmpty, homeItemsGrid, itemCard, itemImgWrap, itemImg, itemImgFallback,
-   itemBadge ok/bad, itemBody, itemTop, itemName, itemPrice, itemCat, itemDesc,
-   itemMetaRow, chip
-*/
+/* tabs/components/home/css/homeItemsGrid.css */
+/* Professional + responsive + clean price layout (tax then discount) */
 
 :root {
   --hi-bg: #ffffff;
@@ -22,7 +15,6 @@
   --hi-shadow-hover: 0 14px 34px rgba(15, 16, 32, 0.12);
 }
 
-/* ---------- wrap ---------- */
 .homeItemsWrap {
   margin-top: 14px;
   background: var(--hi-bg);
@@ -32,7 +24,6 @@
   box-shadow: 0 6px 18px rgba(15, 16, 32, 0.04);
 }
 
-/* ---------- header ---------- */
 .homeItemsHeader {
   padding: 14px 14px 12px;
   border-bottom: 1px solid rgba(15, 16, 32, 0.06);
@@ -60,7 +51,6 @@
   color: var(--hi-muted);
 }
 
-/* ---------- controls ---------- */
 .homeItemsControls {
   display: flex;
   align-items: center;
@@ -70,25 +60,20 @@
   min-width: 260px;
 }
 
-/* ✅ SEARCH (fixes tiny input / wrong sizing) */
 .homeItemsSearch {
   position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
-
-  flex: 1 1 420px; /* allow grow */
-  min-width: 260px; /* prevents collapsing to tiny */
-  max-width: 560px; /* stops being too wide on large screens */
-
-  height: 38px;
+  flex: 1 1 520px;
+  min-width: 280px;
+  max-width: 720px;
+  height: 40px;
   padding: 0 10px 0 12px;
   border-radius: 999px;
-
   border: 1px solid rgba(15, 16, 32, 0.1);
   background: rgba(15, 16, 32, 0.02);
-
-  overflow: hidden; /* ensures input doesn't spill */
+  overflow: hidden;
 }
 
 .homeItemsSearch svg {
@@ -102,14 +87,12 @@
 .homeItemsSearchInput {
   flex: 1 1 auto;
   width: 100%;
-  min-width: 0; /* ✅ important in flex */
+  min-width: 0;
   height: 100%;
-
   border: 0;
   outline: none;
   background: transparent;
-
-  font-size: 12.5px;
+  font-size: 13px;
   color: var(--hi-text);
 }
 
@@ -138,11 +121,6 @@
   place-items: center;
 }
 
-.homeItemsClear:hover {
-  background: rgba(15, 16, 32, 0.1);
-}
-
-/* Toggle */
 .homeItemsToggle {
   display: inline-flex;
   align-items: center;
@@ -160,7 +138,6 @@
   accent-color: var(--hi-primary);
 }
 
-/* Count pill */
 .homeItemsChip {
   font-size: 12px;
   font-weight: 950;
@@ -172,20 +149,26 @@
   white-space: nowrap;
 }
 
-/* ---------- grid ---------- */
 .homeItemsGrid {
   padding: 14px;
   display: grid;
   gap: 14px;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   align-items: start;
 }
 
-/* ---------- cards ---------- */
+.itemCardBtn {
+  text-align: left;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
 .itemCard {
   background: #fff;
   border: 1px solid rgba(11, 12, 21, 0.1);
-  border-radius: 7px;
+  border-radius: 14px;
   overflow: hidden;
   box-shadow: var(--hi-shadow);
   display: grid;
@@ -203,7 +186,6 @@
   border-color: rgba(106, 0, 235, 0.18);
 }
 
-/* Image (no distortion) */
 .itemImgWrap {
   position: relative;
   width: 100%;
@@ -229,7 +211,6 @@
   color: rgba(15, 16, 32, 0.55);
 }
 
-/* Availability badge (clear + distinct) */
 .itemBadge {
   position: absolute;
   top: 10px;
@@ -247,19 +228,15 @@
 
 .itemBadge.ok {
   background: rgba(16, 185, 129, 0.95);
-  border: 1px solid rgba(16, 185, 129, 0.95);
 }
-
 .itemBadge.bad {
   background: rgba(239, 68, 68, 0.95);
-  border: 1px solid rgba(239, 68, 68, 0.95);
 }
 
-/* body */
 .itemBody {
-  padding: 12px;
+  padding: 14px;
   display: grid;
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
 }
 
@@ -267,12 +244,12 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
 }
 
 .itemName {
   font-weight: 950;
-  font-size: 13px;
+  font-size: 13.5px;
   color: rgba(15, 16, 32, 0.92);
   line-height: 1.25;
   display: -webkit-box;
@@ -283,10 +260,33 @@
 }
 
 .itemPrice {
-  font-weight: 1000;
-  font-size: 12px;
-  color: rgba(15, 16, 32, 0.88);
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: flex-end;
   white-space: nowrap;
+}
+
+.priceStack {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  line-height: 1.1;
+}
+
+.priceWas {
+  font-size: 15px;
+  font-weight: 900;
+  color: rgba(239, 68, 68, 0.95);
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  text-decoration-color: rgba(239, 68, 68, 0.95);
+}
+
+.priceNow {
+  font-size: 15px;
+  font-weight: 1000;
+  color: rgba(15, 16, 32, 0.92);
 }
 
 .itemCat {
@@ -301,15 +301,14 @@
 }
 
 .itemDesc {
-  font-size: 12px;
+  font-size: 12.5px;
   color: rgba(15, 16, 32, 0.65);
-  line-height: 1.35;
+  line-height: 1.45;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
 .itemDesc.empty {
   color: rgba(15, 16, 32, 0.45);
 }
@@ -318,21 +317,32 @@
   margin-top: 2px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
 .chip {
   font-size: 11px;
   font-weight: 950;
-  padding: 6px 10px;
+  padding: 7px 12px;
   border-radius: 999px;
   background: rgba(15, 16, 32, 0.04);
   border: 1px solid rgba(15, 16, 32, 0.08);
-  color: rgba(15, 16, 32, 0.8);
+  color: rgba(15, 16, 32, 0.82);
 }
 
-/* ---------- error / empty ---------- */
+.chipAccent {
+  background: rgba(106, 0, 235, 0.08);
+  border-color: rgba(106, 0, 235, 0.18);
+  color: rgba(106, 0, 235, 0.95);
+}
+
+.chipTax {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.2);
+  color: rgba(16, 185, 129, 0.95);
+}
+
 .homeItemsError {
   padding: 12px 14px;
   margin: 14px;
@@ -350,38 +360,32 @@
   font-size: 13px;
 }
 
-/* ---------- skeleton ---------- */
 .homeItemsSkeletonGrid {
   padding: 14px;
   display: grid;
   gap: 14px;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
 }
-
 .itemSkel {
   border: 1px solid rgba(15, 16, 32, 0.1);
-  border-radius: 16px;
+  border-radius: 14px;
   overflow: hidden;
   background: #fff;
 }
-
 .itemSkelImg {
   aspect-ratio: 4 / 3;
   background: rgba(15, 16, 32, 0.06);
 }
-
 .itemSkelLine {
   height: 12px;
   margin: 12px;
   border-radius: 8px;
   background: rgba(15, 16, 32, 0.06);
 }
-
 .itemSkelLine.short {
   width: 60%;
 }
 
-/* ---------- responsive ---------- */
 @media (max-width: 980px) {
   .homeItemsControls {
     justify-content: flex-start;
@@ -399,7 +403,7 @@
   .homeItemsControls {
     width: 100%;
     min-width: 0;
-    gap: 8px;
+    gap: 10px;
     flex: 1 1 100%;
     flex-wrap: wrap;
     justify-content: flex-start;
@@ -407,7 +411,7 @@
 
   .homeItemsSearch {
     flex: 1 1 100%;
-    min-width: 0; /* ✅ allows full-width */
+    min-width: 0;
     max-width: 100%;
   }
 
@@ -415,12 +419,22 @@
   .homeItemsSkeletonGrid {
     padding: 12px;
     gap: 12px;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   }
 
   .itemImgWrap,
   .itemSkelImg {
     aspect-ratio: 16 / 11;
+  }
+
+  .priceStack {
+    gap: 8px;
+  }
+  .priceWas {
+    font-size: 10.5px;
+  }
+  .priceNow {
+    font-size: 12.5px;
   }
 }
 

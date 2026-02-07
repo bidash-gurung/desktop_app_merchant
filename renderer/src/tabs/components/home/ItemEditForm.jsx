@@ -216,7 +216,7 @@ export default function ItemEditForm({
       alive = false;
       if (abortRef.current) abortRef.current.abort();
     };
-  }, [CATEGORY_ENDPOINT, businessId, token, isMart]);
+  }, [businessId, token, isMart]);
 
   function dietToIsVeg(diet) {
     if (diet === "veg") return 1;

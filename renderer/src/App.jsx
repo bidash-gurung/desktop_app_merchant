@@ -309,7 +309,7 @@ export default function App() {
         const updated = applyNewAccessTokenToSession(current, newAccess);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
         setSession(updated);
-      } catch (e) {
+      } catch {
         if (!alive) return;
         logout();
       } finally {

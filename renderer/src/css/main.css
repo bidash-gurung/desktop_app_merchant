@@ -50,7 +50,6 @@ body {
   min-width: 0;
 }
 
-/* ✅ New header: logo + business name only */
 .sideHeader {
   display: flex;
   align-items: center;
@@ -198,6 +197,46 @@ body {
   min-width: 0;
 }
 
+/* ✅ window buttons */
+.winBtns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.winBtn {
+  width: 34px;
+  height: 30px;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 16, 32, 0.12);
+  background: rgba(255, 255, 255, 0.85);
+  color: rgba(15, 16, 32, 0.82);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    transform 120ms ease;
+}
+
+.winBtn:hover {
+  background: rgba(106, 0, 235, 0.08);
+  border-color: rgba(106, 0, 235, 0.22);
+}
+
+.winBtn:active {
+  transform: translateY(1px);
+}
+
+.winBtn.close:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.28);
+  color: rgba(185, 28, 28, 0.95);
+}
+
 .topBizLogo {
   width: 36px;
   height: 36px;
@@ -272,16 +311,17 @@ body {
 .topUserName {
   font-weight: 900;
   color: rgba(15, 16, 32, 0.85);
-  font-size: 13px;
+  font-size: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 180px;
+  max-width: 240px; /* ✅ allow full names more */
 }
 
+/* avatar */
 .topProfile {
-  width: 50px;
-  height: 50px;
+  width: 52px;
+  height: 52px;
   border-radius: 999px;
   border: 1px solid rgba(15, 16, 32, 0.12);
   background: rgba(15, 16, 32, 0.04);
@@ -289,6 +329,11 @@ body {
   place-items: center;
   overflow: hidden;
   flex: 0 0 auto;
+}
+
+.topProfileLg {
+  width: 56px;
+  height: 56px;
 }
 
 .topProfileImg {
@@ -300,7 +345,7 @@ body {
 .topProfileFallback {
   font-weight: 900;
   color: rgba(15, 16, 32, 0.7);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .panel {
@@ -312,28 +357,26 @@ body {
 .muted {
   color: var(--muted);
 }
-/* add/merge into your main.css (only the new bits) */
 
-/* Bigger profile image */
+/* ---------- responsive ---------- */
 
-/* responsive: reduce name width on smaller screens */
+/* reduce name width on smaller screens */
 @media (max-width: 720px) {
   .topUserName {
-    max-width: 160px;
+    max-width: 180px;
   }
 }
 
-/* ✅ PERFECT COLLAPSED MODE (logo stays, no marks) */
+/* ✅ PERFECT COLLAPSED MODE */
 @media (max-width: 860px) {
   .app {
-    grid-template-columns: 74px 1fr; /* clean rail */
+    grid-template-columns: 74px 1fr;
   }
 
   .side {
     padding: 10px;
   }
 
-  /* show ONLY logo in header */
   .sideHeader {
     padding: 8px 0 12px;
     justify-content: center;
@@ -396,23 +439,39 @@ body {
     display: none;
   }
 
-  /* top bar tighter */
   .top {
     grid-template-columns: 1fr 1.4fr 1fr;
     padding: 0 12px;
   }
 
   .topUserName {
-    max-width: 120px;
+    max-width: 150px;
+  }
+
+  .topProfileLg {
+    width: 52px;
+    height: 52px;
   }
 }
 
-/* small: address truncates earlier, keep right clean */
+/* small: keep right clean */
 @media (max-width: 520px) {
   .top {
     grid-template-columns: 1fr 1fr 1fr;
   }
+
   .topUserName {
-    display: none; /* only profile image on very small */
+    display: none;
+  }
+
+  .topProfileLg {
+    width: 50px;
+    height: 50px;
+  }
+
+  .winBtn {
+    width: 32px;
+    height: 28px;
+    border-radius: 9px;
   }
 }
