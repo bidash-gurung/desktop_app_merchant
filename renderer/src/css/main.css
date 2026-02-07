@@ -1,17 +1,26 @@
+/* main.css */
 :root {
   --primary: #6a00eb;
   --bg: #f6f6fb;
   --text: #0f1020;
   --muted: rgba(15, 16, 32, 0.62);
-  --border: rgba(15, 16, 32, 0.12);
-  --shadow: 0 18px 55px rgba(15, 16, 32, 0.12);
+  --line: rgba(15, 16, 32, 0.08);
 }
 
-.appShell {
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
   width: 100%;
   height: 100%;
-  display: grid;
-  grid-template-columns: 280px 1fr;
+  margin: 0;
+  padding: 0;
+}
+
+body {
   background: var(--bg);
   color: var(--text);
   font-family:
@@ -23,172 +32,387 @@
     sans-serif;
 }
 
-.sidebar {
-  background: #fff;
-  border-right: 1px solid rgba(15, 16, 32, 0.08);
+.app {
+  width: 100%;
+  height: 100%;
   display: grid;
-  grid-template-rows: auto 1fr auto;
-  padding: 18px;
+  grid-template-columns: 260px 1fr;
+  min-width: 0;
 }
 
-.brandRow {
+/* ---------- sidebar ---------- */
+.side {
+  background: #fff;
+  border-right: 1px solid var(--line);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 16px;
+  min-width: 0;
+}
+
+/* ✅ New header: logo + business name only */
+.sideHeader {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 8px 8px 14px;
+  border-bottom: 1px solid var(--line);
+  min-width: 0;
 }
 
-.brandLogoBox {
-  width: 48px;
-  height: 48px;
+.sideBrandLogo {
+  width: 42px;
+  height: 42px;
   border-radius: 14px;
+  border: 1px solid rgba(106, 0, 235, 0.18);
   background: rgba(106, 0, 235, 0.08);
-  border: 1px solid rgba(106, 0, 235, 0.14);
   display: grid;
   place-items: center;
   overflow: hidden;
+  flex: 0 0 auto;
 }
 
-.brandLogo {
+.sideBrandLogoImg {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  padding: 6px;
-  display: block;
+  object-fit: cover;
 }
 
-.brandText .brandTitle {
+.sideBrandLogoFallback {
   font-weight: 900;
-  letter-spacing: -0.2px;
+  color: var(--primary);
+  font-size: 12px;
 }
 
-.brandText .brandSub {
-  font-size: 12px;
-  opacity: 0.65;
-  margin-top: 2px;
-  max-width: 170px;
+.sideBrandText {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.sideBizName {
+  font-weight: 900;
+  font-size: 14px;
+  line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+/* nav */
 .nav {
+  padding-top: 14px;
   display: grid;
   gap: 8px;
   align-content: start;
-  padding-top: 10px;
+  min-width: 0;
 }
 
-.navItem {
+.navBtn {
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 10px;
-  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
   border: 1px solid rgba(15, 16, 32, 0.08);
   background: #fff;
-  border-radius: 14px;
-  padding: 10px 12px;
   cursor: pointer;
   text-align: left;
+  min-width: 0;
   transition:
     background 120ms ease,
-    border-color 120ms ease,
-    box-shadow 120ms ease;
+    border-color 120ms ease;
 }
 
-.navItem:hover {
+.navBtn:hover {
   background: rgba(106, 0, 235, 0.06);
   border-color: rgba(106, 0, 235, 0.18);
 }
 
-.navItem.active {
+.navBtn.active {
   background: rgba(106, 0, 235, 0.1);
-  border-color: rgba(106, 0, 235, 0.24);
-  box-shadow: 0 10px 26px rgba(106, 0, 235, 0.1);
+  border-color: rgba(106, 0, 235, 0.26);
 }
 
-.navIcon {
+.navIco {
   color: rgba(15, 16, 32, 0.75);
   display: grid;
   place-items: center;
+  flex: 0 0 auto;
 }
 
-.navLabel {
+.navTxt {
   font-weight: 800;
-  color: rgba(15, 16, 32, 0.85);
+  color: rgba(15, 16, 32, 0.86);
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.sidebarFooter {
+.sideFooter {
   padding-top: 12px;
+  border-top: 1px solid var(--line);
 }
 
-.logoutBtn {
+.logout {
   width: 100%;
-  border: 1px solid rgba(210, 40, 60, 0.22);
+  border-radius: 12px;
+  border: 1px solid rgba(210, 40, 60, 0.18);
   background: rgba(210, 40, 60, 0.08);
   color: rgba(210, 40, 60, 0.95);
-  border-radius: 14px;
+  font-weight: 900;
   padding: 10px 12px;
   cursor: pointer;
-  font-weight: 900;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.logoutBtn:hover {
-  background: rgba(210, 40, 60, 0.12);
-}
-
-.mainArea {
+/* ---------- main ---------- */
+.main {
   display: grid;
   grid-template-rows: auto 1fr;
   overflow: hidden;
+  min-width: 0;
 }
 
-.topBar {
-  height: 64px;
-  background: rgba(255, 255, 255, 0.7);
+/* ✅ Top bar: left / center / right */
+.top {
+  height: 80px;
+  display: grid;
+  grid-template-columns: 1fr minmax(260px, 1.6fr) 1fr;
+  align-items: center;
+  padding: 0 18px;
+  background: rgba(255, 255, 255, 0.75);
+  border-bottom: 1px solid var(--line);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(15, 16, 32, 0.08);
+  min-width: 0;
+  gap: 12px;
+}
+
+.topLeft {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 18px;
+  gap: 10px;
+  min-width: 0;
 }
 
-.topTitle {
+.topBizLogo {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  border: 1px solid rgba(106, 0, 235, 0.18);
+  background: rgba(106, 0, 235, 0.08);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+
+.topBizLogoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.topBizLogoFallback {
   font-weight: 900;
-  font-size: 16px;
+  color: var(--primary);
+  font-size: 12px;
+}
+
+.topBizName {
+  font-weight: 900;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.topCenter {
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.topAddress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+  color: rgba(15, 16, 32, 0.78);
+  font-size: 12px;
+}
+
+.pin {
+  color: rgba(15, 16, 32, 0.6);
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.addrText {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .topRight {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 10px;
+  min-width: 0;
 }
 
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
+.topUserName {
+  font-weight: 900;
+  color: rgba(15, 16, 32, 0.85);
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+.topProfile {
+  width: 50px;
+  height: 50px;
   border-radius: 999px;
-  border: 1px solid rgba(15, 16, 32, 0.1);
-  background: #fff;
-  font-weight: 800;
-  font-size: 12px;
-  color: rgba(15, 16, 32, 0.75);
+  border: 1px solid rgba(15, 16, 32, 0.12);
+  background: rgba(15, 16, 32, 0.04);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  flex: 0 0 auto;
 }
 
-.chipDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: #15b56b;
+.topProfileImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.content {
+.topProfileFallback {
+  font-weight: 900;
+  color: rgba(15, 16, 32, 0.7);
+  font-size: 13px;
+}
+
+.panel {
+  padding: 16px;
   overflow: auto;
-  padding: 0;
+  min-width: 0;
+}
+
+.muted {
+  color: var(--muted);
+}
+/* add/merge into your main.css (only the new bits) */
+
+/* Bigger profile image */
+
+/* responsive: reduce name width on smaller screens */
+@media (max-width: 720px) {
+  .topUserName {
+    max-width: 160px;
+  }
+}
+
+/* ✅ PERFECT COLLAPSED MODE (logo stays, no marks) */
+@media (max-width: 860px) {
+  .app {
+    grid-template-columns: 74px 1fr; /* clean rail */
+  }
+
+  .side {
+    padding: 10px;
+  }
+
+  /* show ONLY logo in header */
+  .sideHeader {
+    padding: 8px 0 12px;
+    justify-content: center;
+  }
+
+  .sideBrandText {
+    display: none;
+  }
+
+  .nav {
+    padding-top: 8px;
+    gap: 10px;
+    justify-items: center;
+  }
+
+  .navBtn {
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    border-radius: 14px;
+  }
+
+  .navBtn:hover {
+    background: rgba(106, 0, 235, 0.1);
+    border-color: transparent;
+  }
+
+  .navBtn.active {
+    background: rgba(106, 0, 235, 0.16);
+    border-color: transparent;
+  }
+
+  .navTxt {
+    display: none;
+  }
+
+  .navIco {
+    color: rgba(15, 16, 32, 0.78);
+  }
+
+  .sideFooter {
+    border-top: 0;
+    padding-top: 8px;
+    display: grid;
+    justify-items: center;
+  }
+
+  .logout {
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 14px;
+  }
+
+  .logout .navTxt {
+    display: none;
+  }
+
+  /* top bar tighter */
+  .top {
+    grid-template-columns: 1fr 1.4fr 1fr;
+    padding: 0 12px;
+  }
+
+  .topUserName {
+    max-width: 120px;
+  }
+}
+
+/* small: address truncates earlier, keep right clean */
+@media (max-width: 520px) {
+  .top {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  .topUserName {
+    display: none; /* only profile image on very small */
+  }
 }

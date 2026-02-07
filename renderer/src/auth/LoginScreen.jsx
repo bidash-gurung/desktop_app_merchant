@@ -1,18 +1,63 @@
+// LoginScreen.jsx
 import React from "react";
 import "./css/auth.css";
 
-const LOGIN_ENDPOINT = import.meta.env.VITE_LOGIN_USERNAME_MERCHANT_ENDPOINT;
+const LOGIN_EMAIL_ENDPOINT = import.meta.env
+  .VITE_LOGIN_USERNAME_MERCHANT_ENDPOINT;
+const LOGIN_PHONE_ENDPOINT = import.meta.env.VITE_LOGIN_MERCHANT_ENDPOINT;
+
+// ✅ remember-me storage key (scoped for merchant portal)
+const REMEMBER_KEY = "merchant_portal_remember_v1";
 
 export default function LoginScreen({ onLoginSuccess }) {
   const [tab, setTab] = React.useState("email"); // "email" | "phone"
 
   const [email, setEmail] = React.useState("");
-  const [phone, setPhone] = React.useState("+975 ");
+  const [phone, setPhone] = React.useState(""); // store only digits user types
   const [password, setPassword] = React.useState("");
   const [showPassword, setShowPassword] = React.useState(false);
 
+  // ✅ remember me state (was not wired before)
+  const [remember, setRemember] = React.useState(false);
+
   const [loading, setLoading] = React.useState(false);
   const [banner, setBanner] = React.useState(null); // {type,title,message}
+
+  // ✅ load remembered credentials once
+  React.useEffect(() => {
+    try {
+      const raw = localStorage.getItem(REMEMBER_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+
+      if (saved?.tab === "phone" || saved?.tab === "email") setTab(saved.tab);
+
+      if (saved?.tab === "phone") {
+        if (saved?.phoneDigits) setPhone(String(saved.phoneDigits));
+      } else {
+        if (saved?.email) setEmail(String(saved.email));
+      }
+
+      if (saved?.password) setPassword(String(saved.password));
+      if (saved?.remember) setRemember(true);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // ✅ persist when user toggles remember or changes fields (only if remember is ON)
+  React.useEffect(() => {
+    try {
+      if (!remember) return;
+      const payload =
+        tab === "phone"
+          ? { remember: true, tab, phoneDigits: phone, password }
+          : { remember: true, tab, email, password };
+      localStorage.setItem(REMEMBER_KEY, JSON.stringify(payload));
+    } catch {
+      // ignore
+    }
+  }, [remember, tab, email, phone, password]);
 
   function clearBanner() {
     setBanner(null);
@@ -37,16 +82,43 @@ export default function LoginScreen({ onLoginSuccess }) {
     return payload.message || payload.error || payload.msg || "";
   }
 
+  function digitsOnly(v) {
+    return String(v || "").replace(/[^\d]/g, "");
+  }
+
+  function handleTabChange(nextTab) {
+    setTab(nextTab);
+    clearBanner();
+
+    // ✅ If remember is ON, also update stored tab immediately
+    try {
+      if (remember) {
+        const payload =
+          nextTab === "phone"
+            ? { remember: true, tab: "phone", phoneDigits: phone, password }
+            : { remember: true, tab: "email", email, password };
+        localStorage.setItem(REMEMBER_KEY, JSON.stringify(payload));
+      }
+    } catch {
+      // ignore
+    }
+  }
+
   async function onSubmit(e) {
     e.preventDefault();
     clearBanner();
 
-    if (!LOGIN_ENDPOINT) {
+    const endpoint =
+      tab === "email" ? LOGIN_EMAIL_ENDPOINT : LOGIN_PHONE_ENDPOINT;
+
+    if (!endpoint) {
       setBanner({
         type: "error",
         title: "Configuration error",
         message:
-          "Missing env: VITE_LOGIN_USERNAME_MERCHANT_ENDPOINT. Add it to renderer/.env and restart.",
+          tab === "email"
+            ? "Missing env: VITE_LOGIN_USERNAME_MERCHANT_ENDPOINT. Add it to renderer/.env and restart."
+            : "Missing env: VITE_LOGIN_MERCHANT_ENDPOINT. Add it to renderer/.env and restart.",
       });
       return;
     }
@@ -74,8 +146,8 @@ export default function LoginScreen({ onLoginSuccess }) {
       }
       body = { email: em, password: pass };
     } else {
-      const ph = phone.trim();
-      if (!ph || ph === "+975") {
+      const rawDigits = digitsOnly(phone);
+      if (!rawDigits) {
         setBanner({
           type: "error",
           title: "Missing phone",
@@ -83,13 +155,15 @@ export default function LoginScreen({ onLoginSuccess }) {
         });
         return;
       }
-      // If backend expects different key change here
-      body = { phone: ph, password: pass };
+
+      // ✅ Send +975 + digits, with NO spaces: +97517XXXXXX
+      const fullPhone = `+975${rawDigits}`;
+      body = { phone: fullPhone, password: pass };
     }
 
     setLoading(true);
     try {
-      const res = await fetch(LOGIN_ENDPOINT, {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -107,13 +181,32 @@ export default function LoginScreen({ onLoginSuccess }) {
         return;
       }
 
+      // ✅ Only store remembered values when login succeeds
+      try {
+        if (remember) {
+          const saved =
+            tab === "phone"
+              ? {
+                  remember: true,
+                  tab,
+                  phoneDigits: digitsOnly(phone),
+                  password: pass,
+                }
+              : { remember: true, tab, email: email.trim(), password: pass };
+          localStorage.setItem(REMEMBER_KEY, JSON.stringify(saved));
+        } else {
+          localStorage.removeItem(REMEMBER_KEY);
+        }
+      } catch {
+        // ignore
+      }
+
       setBanner({
         type: "success",
         title: "Success",
         message: extractMessage(payload) || "Login successful.",
       });
 
-      // ✅ Save + redirect (App will switch to MainScreen)
       onLoginSuccess?.(payload);
     } catch (err) {
       setBanner({
@@ -185,10 +278,7 @@ export default function LoginScreen({ onLoginSuccess }) {
                 role="tab"
                 aria-selected={tab === "email"}
                 className={`tabBtn ${tab === "email" ? "active" : ""}`}
-                onClick={() => {
-                  setTab("email");
-                  clearBanner();
-                }}
+                onClick={() => handleTabChange("email")}
               >
                 Email
               </button>
@@ -197,16 +287,12 @@ export default function LoginScreen({ onLoginSuccess }) {
                 role="tab"
                 aria-selected={tab === "phone"}
                 className={`tabBtn ${tab === "phone" ? "active" : ""}`}
-                onClick={() => {
-                  setTab("phone");
-                  clearBanner();
-                }}
+                onClick={() => handleTabChange("phone")}
               >
                 Phone
               </button>
             </div>
 
-            {/* ✅ Only message banner, no JSON */}
             {banner && (
               <div className={`banner ${banner.type}`}>
                 <div className="bannerTop">
@@ -245,18 +331,19 @@ export default function LoginScreen({ onLoginSuccess }) {
                     <div className="phonePrefix">+975</div>
                     <input
                       className="input phoneInput"
-                      value={phone.replace("+975", "").trimStart()}
-                      onChange={(e) => setPhone(`+975 ${e.target.value}`)}
+                      value={phone}
+                      onChange={(e) => setPhone(digitsOnly(e.target.value))}
                       placeholder="17XXXXXX"
                       inputMode="tel"
                       autoComplete="tel"
                     />
                   </div>
-                  <div className="hint">Default country code is +975</div>
+                  <div className="hint">
+                    We’ll send as +975{phone || "17XXXXXX"} (no spaces)
+                  </div>
                 </div>
               )}
 
-              {/* Password with eye icon */}
               <div className="field">
                 <label className="label">Password</label>
                 <div className="passwordWrap">
@@ -283,10 +370,26 @@ export default function LoginScreen({ onLoginSuccess }) {
               </div>
 
               <div className="row">
+                {/* ✅ wired checkbox */}
                 <label className="check">
-                  <input type="checkbox" />
+                  <input
+                    type="checkbox"
+                    checked={remember}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setRemember(checked);
+                      if (!checked) {
+                        try {
+                          localStorage.removeItem(REMEMBER_KEY);
+                        } catch {
+                          // ignore
+                        }
+                      }
+                    }}
+                  />
                   <span>Remember me</span>
                 </label>
+
                 <button
                   type="button"
                   className="linkBtn"

@@ -1,0 +1,432 @@
+/* ./tabs/components/home/css/homeItemsGrid.css */
+/* Works with your HomeItemsGrid.jsx classNames:
+   homeItemsWrap, homeItemsHeader, homeItemsHeadLeft, homeItemsTitle, homeItemsSub,
+   homeItemsControls, homeItemsSearch, homeItemsSearchInput, homeItemsClear,
+   homeItemsToggle, homeItemsChip, homeItemsError, homeItemsSkeletonGrid, itemSkel*,
+   homeItemsEmpty, homeItemsGrid, itemCard, itemImgWrap, itemImg, itemImgFallback,
+   itemBadge ok/bad, itemBody, itemTop, itemName, itemPrice, itemCat, itemDesc,
+   itemMetaRow, chip
+*/
+
+:root {
+  --hi-bg: #ffffff;
+  --hi-line: rgba(15, 16, 32, 0.08);
+  --hi-muted: rgba(15, 16, 32, 0.62);
+  --hi-text: #0f1020;
+  --hi-primary: #6a00eb;
+
+  --hi-ok: #10b981;
+  --hi-bad: #ef4444;
+
+  --hi-shadow: 0 10px 26px rgba(15, 16, 32, 0.08);
+  --hi-shadow-hover: 0 14px 34px rgba(15, 16, 32, 0.12);
+}
+
+/* ---------- wrap ---------- */
+.homeItemsWrap {
+  margin-top: 14px;
+  background: var(--hi-bg);
+  border: 1px solid var(--hi-line);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(15, 16, 32, 0.04);
+}
+
+/* ---------- header ---------- */
+.homeItemsHeader {
+  padding: 14px 14px 12px;
+  border-bottom: 1px solid rgba(15, 16, 32, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.homeItemsHeadLeft {
+  min-width: 220px;
+}
+
+.homeItemsTitle {
+  font-size: 14px;
+  font-weight: 950;
+  color: var(--hi-text);
+  line-height: 1.2;
+}
+
+.homeItemsSub {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--hi-muted);
+}
+
+/* ---------- controls ---------- */
+.homeItemsControls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex: 1 1 520px;
+  min-width: 260px;
+}
+
+/* ✅ SEARCH (fixes tiny input / wrong sizing) */
+.homeItemsSearch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  flex: 1 1 420px; /* allow grow */
+  min-width: 260px; /* prevents collapsing to tiny */
+  max-width: 560px; /* stops being too wide on large screens */
+
+  height: 38px;
+  padding: 0 10px 0 12px;
+  border-radius: 999px;
+
+  border: 1px solid rgba(15, 16, 32, 0.1);
+  background: rgba(15, 16, 32, 0.02);
+
+  overflow: hidden; /* ensures input doesn't spill */
+}
+
+.homeItemsSearch svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  opacity: 0.55;
+  color: rgba(15, 16, 32, 0.8);
+}
+
+.homeItemsSearchInput {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0; /* ✅ important in flex */
+  height: 100%;
+
+  border: 0;
+  outline: none;
+  background: transparent;
+
+  font-size: 12.5px;
+  color: var(--hi-text);
+}
+
+.homeItemsSearchInput::placeholder {
+  color: rgba(15, 16, 32, 0.45);
+}
+
+.homeItemsSearch:focus-within {
+  border-color: rgba(106, 0, 235, 0.35);
+  background: rgba(106, 0, 235, 0.05);
+  box-shadow: 0 0 0 3px rgba(106, 0, 235, 0.1);
+}
+
+.homeItemsClear {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 0;
+  background: rgba(15, 16, 32, 0.06);
+  color: rgba(15, 16, 32, 0.7);
+  font-size: 18px;
+  line-height: 0;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.homeItemsClear:hover {
+  background: rgba(15, 16, 32, 0.1);
+}
+
+/* Toggle */
+.homeItemsToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 900;
+  color: rgba(15, 16, 32, 0.8);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.homeItemsToggle input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--hi-primary);
+}
+
+/* Count pill */
+.homeItemsChip {
+  font-size: 12px;
+  font-weight: 950;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(106, 0, 235, 0.1);
+  border: 1px solid rgba(106, 0, 235, 0.16);
+  color: var(--hi-primary);
+  white-space: nowrap;
+}
+
+/* ---------- grid ---------- */
+.homeItemsGrid {
+  padding: 14px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  align-items: start;
+}
+
+/* ---------- cards ---------- */
+.itemCard {
+  background: #fff;
+  border: 1px solid rgba(11, 12, 21, 0.1);
+  border-radius: 7px;
+  overflow: hidden;
+  box-shadow: var(--hi-shadow);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease;
+}
+
+.itemCard:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--hi-shadow-hover);
+  border-color: rgba(106, 0, 235, 0.18);
+}
+
+/* Image (no distortion) */
+.itemImgWrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: rgba(15, 16, 32, 0.03);
+  overflow: hidden;
+}
+
+.itemImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.itemImgFallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 950;
+  color: rgba(15, 16, 32, 0.55);
+}
+
+/* Availability badge (clear + distinct) */
+.itemBadge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 3;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 1000;
+  letter-spacing: 0.35px;
+  text-transform: uppercase;
+  color: #fff;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+}
+
+.itemBadge.ok {
+  background: rgba(16, 185, 129, 0.95);
+  border: 1px solid rgba(16, 185, 129, 0.95);
+}
+
+.itemBadge.bad {
+  background: rgba(239, 68, 68, 0.95);
+  border: 1px solid rgba(239, 68, 68, 0.95);
+}
+
+/* body */
+.itemBody {
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.itemTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.itemName {
+  font-weight: 950;
+  font-size: 13px;
+  color: rgba(15, 16, 32, 0.92);
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.itemPrice {
+  font-weight: 1000;
+  font-size: 12px;
+  color: rgba(15, 16, 32, 0.88);
+  white-space: nowrap;
+}
+
+.itemCat {
+  width: fit-content;
+  font-size: 11px;
+  font-weight: 950;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(106, 0, 235, 0.1);
+  border: 1px solid rgba(106, 0, 235, 0.16);
+  color: var(--hi-primary);
+}
+
+.itemDesc {
+  font-size: 12px;
+  color: rgba(15, 16, 32, 0.65);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.itemDesc.empty {
+  color: rgba(15, 16, 32, 0.45);
+}
+
+.itemMetaRow {
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  font-size: 11px;
+  font-weight: 950;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(15, 16, 32, 0.04);
+  border: 1px solid rgba(15, 16, 32, 0.08);
+  color: rgba(15, 16, 32, 0.8);
+}
+
+/* ---------- error / empty ---------- */
+.homeItemsError {
+  padding: 12px 14px;
+  margin: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(239, 68, 68, 0.22);
+  background: rgba(239, 68, 68, 0.08);
+  color: rgba(185, 28, 28, 0.95);
+  font-weight: 900;
+  font-size: 12.5px;
+}
+
+.homeItemsEmpty {
+  padding: 18px 14px;
+  color: rgba(15, 16, 32, 0.7);
+  font-size: 13px;
+}
+
+/* ---------- skeleton ---------- */
+.homeItemsSkeletonGrid {
+  padding: 14px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+.itemSkel {
+  border: 1px solid rgba(15, 16, 32, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.itemSkelImg {
+  aspect-ratio: 4 / 3;
+  background: rgba(15, 16, 32, 0.06);
+}
+
+.itemSkelLine {
+  height: 12px;
+  margin: 12px;
+  border-radius: 8px;
+  background: rgba(15, 16, 32, 0.06);
+}
+
+.itemSkelLine.short {
+  width: 60%;
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 980px) {
+  .homeItemsControls {
+    justify-content: flex-start;
+  }
+  .homeItemsSearch {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .homeItemsHeader {
+    padding: 12px;
+  }
+
+  .homeItemsControls {
+    width: 100%;
+    min-width: 0;
+    gap: 8px;
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .homeItemsSearch {
+    flex: 1 1 100%;
+    min-width: 0; /* ✅ allows full-width */
+    max-width: 100%;
+  }
+
+  .homeItemsGrid,
+  .homeItemsSkeletonGrid {
+    padding: 12px;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  .itemImgWrap,
+  .itemSkelImg {
+    aspect-ratio: 16 / 11;
+  }
+}
+
+@media (max-width: 420px) {
+  .homeItemsGrid,
+  .homeItemsSkeletonGrid {
+    grid-template-columns: 1fr;
+  }
+}

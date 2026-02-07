@@ -1,41 +1,42 @@
-import React from "react";
+// tabs/HomeTab.jsx
+import React, { useMemo } from "react";
+import HomeItemsGrid from "./components/home/HomeItemsGrid";
+import "./css/home.css";
 
 export default function HomeTab({ session }) {
-  const user = session?.payload?.user || session?.payload?.data?.user || {};
+  const user = useMemo(() => {
+    return session?.payload?.user || session?.payload?.data?.user || {};
+  }, [session]);
+
+  // ✅ This is where business_id comes from (session payload)
+  const businessId = user?.business_id || null;
+  const ownerType = String(user?.owner_type || "").toLowerCase(); // "mart" | "food" | etc.
+
   return (
-    <div style={{ padding: 18 }}>
-      <h2 style={{ marginTop: 0 }}>Welcome</h2>
-      <p style={{ opacity: 0.75, marginTop: 6 }}>
-        Logged in as <b>{user?.user_name || user?.user_name || "Merchant"}</b>
-      </p>
-      <div
-        style={{
-          marginTop: 14,
-          display: "grid",
-          gap: 12,
-          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-        }}
-      >
-        <Card title="Today Orders" value="—" />
-        <Card title="Revenue" value="—" />
-        <Card title="Pending" value="—" />
+    <div className="homeWrap">
+      {/* cards row */}
+      <div className="homeCards">
+        <StatCard title="Today Sales" value="—" />
+        <StatCard title="Active" value="—" />
+        <StatCard title="Cancelled" value="—" />
+        <StatCard title="Pending" value="—" />
       </div>
+
+      {/* items grid */}
+      <HomeItemsGrid
+        session={session}
+        businessId={businessId}
+        ownerType={ownerType}
+      />
     </div>
   );
 }
 
-function Card({ title, value }) {
+function StatCard({ title, value }) {
   return (
-    <div
-      style={{
-        border: "1px solid rgba(15,16,32,0.10)",
-        borderRadius: 14,
-        padding: 14,
-        background: "#fff",
-      }}
-    >
-      <div style={{ fontSize: 12, opacity: 0.65 }}>{title}</div>
-      <div style={{ fontSize: 20, fontWeight: 900, marginTop: 6 }}>{value}</div>
+    <div className="statCard">
+      <div className="statTitle">{title}</div>
+      <div className="statValue">{value}</div>
     </div>
   );
 }

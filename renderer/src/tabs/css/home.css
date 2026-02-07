@@ -1,0 +1,56 @@
+/* ./tabs/css/home.css */
+
+.homeWrap {
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+}
+
+/* ✅ Top stat cards row */
+.homeCards {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+/* card */
+.statCard {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(15, 16, 32, 0.08);
+  border-radius: 16px;
+  padding: 14px 14px 12px;
+  backdrop-filter: blur(10px);
+  min-width: 0;
+}
+
+.statTitle {
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(15, 16, 32, 0.7);
+  letter-spacing: 0.2px;
+}
+
+.statValue {
+  margin-top: 8px;
+  font-size: 18px;
+  font-weight: 950;
+  color: rgba(15, 16, 32, 0.92);
+  line-height: 1.1;
+}
+
+/* ✅ responsive */
+@media (max-width: 1100px) {
+  .homeCards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .homeWrap {
+    padding: 12px;
+  }
+  .homeCards {
+    grid-template-columns: 1fr;
+  }
+}
