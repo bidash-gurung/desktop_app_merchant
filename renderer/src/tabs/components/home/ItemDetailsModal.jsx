@@ -55,6 +55,47 @@ export default function ItemDetailsModal({
 
   const endpointBase = isMart ? MART_EDIT : FOOD_EDIT;
 
+  /* ✅ HEIGHT SYNC (NEW) ------------------------------------------
+     We sync left image wrapper height to the visible right panel height.
+     - View mode -> bottom of Description box
+     - Edit mode -> bottom of Save/Cancel buttons
+  -----------------------------------------------------------------*/
+  const rightRef = useRef(null);
+  const [rightHeight, setRightHeight] = useState(0);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const el = rightRef.current;
+    if (!el) return;
+
+    const measure = () => {
+      // only sync on desktop two-column layout
+      const isStacked = window.matchMedia("(max-width: 980px)").matches;
+      if (isStacked) {
+        setRightHeight(0);
+        return;
+      }
+      const h = Math.ceil(el.getBoundingClientRect().height || 0);
+      setRightHeight(h);
+    };
+
+    measure();
+
+    let ro = null;
+    if (typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(() => measure());
+      ro.observe(el);
+    }
+
+    window.addEventListener("resize", measure);
+
+    return () => {
+      window.removeEventListener("resize", measure);
+      if (ro) ro.disconnect();
+    };
+  }, [open, editing, safeItem?.id]);
+
   useEffect(() => {
     function onKey(e) {
       if (e.key === "Escape") onClose?.();
@@ -71,6 +112,7 @@ export default function ItemDetailsModal({
       setConfirmOpen(false);
       setDeleting(false);
       setDeleteErr("");
+      setRightHeight(0);
     }
   }, [open]);
 
@@ -116,10 +158,7 @@ export default function ItemDetailsModal({
           : "—",
       ],
       ["Availability", availability ? "Available" : "Unavailable"],
-      [
-        "Spice level",
-        safeItem?.spice_level ? String(safeItem.spice_level) : "—",
-      ],
+      ["Spice level", safeItem?.spice_level ? String(safeItem.spice_level) : "—"],
       [
         "Veg",
         safeItem?.is_veg != null
@@ -142,7 +181,9 @@ export default function ItemDetailsModal({
       return;
     }
     if (!endpointBase) {
-      setDeleteErr(isMart ? "Missing env: VITE_ITEM_EDIT" : "Missing env: VITE_FOOD_MENU_EDIT");
+      setDeleteErr(
+        isMart ? "Missing env: VITE_ITEM_EDIT" : "Missing env: VITE_FOOD_MENU_EDIT",
+      );
       return;
     }
 
@@ -246,7 +287,10 @@ export default function ItemDetailsModal({
 
           <div className="imBody">
             <div className="imLeft">
-              <div className="imImageWrap">
+              <div
+                className="imImageWrap"
+                style={rightHeight ? { height: `${rightHeight}px` } : undefined}
+              >
                 {leftImageUrl ? (
                   <img className="imImage" src={leftImageUrl} alt={title} />
                 ) : (
@@ -255,7 +299,7 @@ export default function ItemDetailsModal({
               </div>
             </div>
 
-            <div className="imRight">
+            <div className="imRight" ref={rightRef}>
               {!editing ? (
                 <>
                   <div className="imMeta">
@@ -296,7 +340,6 @@ export default function ItemDetailsModal({
         </div>
       </div>
 
-      {/* ✅ FIXED CONFIRM OVERLAY (always centered, never at bottom) */}
       {confirmOpen ? (
         <div
           className="imConfirmOverlay"

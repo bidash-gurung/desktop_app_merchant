@@ -1,9 +1,10 @@
 /* tabs/components/home/css/itemModal.css */
 /* ✅ FULL REPLACE
-   Goal:
-   - LEFT image height ALWAYS matches RIGHT content height (description OR edit form)
-   - No extra white space
-   - Dynamic: when switching to Edit, image grows/shrinks to match form height
+   FIX:
+   - Image height = RIGHT visible content height (view: until bottom of Description box)
+   - Edit mode: image height = until bottom of Cancel/Save buttons
+   - No extra white space below image when content is short
+   - Still scrolls nicely when content is tall (scroll happens on modal container)
 */
 
 :root {
@@ -37,20 +38,31 @@
 }
 
 /* ---------- modal ---------- */
+/* ✅ IMPORTANT: modal scrolls (not body), so body can shrink-wrap */
 .imModal {
   width: min(1120px, 100%);
   max-height: min(88vh, 920px);
+
   background: var(--im-bg);
   border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 10px;
   box-shadow: var(--im-shadow);
-  overflow: hidden;
-  display: grid;
-  grid-template-rows: auto 1fr;
+
+  /* ✅ allow scrolling when tall */
+  overflow: auto;
+
+  /* ✅ layout: header + body (body takes natural height) */
+  display: flex;
+  flex-direction: column;
 }
 
 /* ---------- header ---------- */
+/* Optional but nice: keep header visible while scrolling */
 .imHeader {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+
   padding: 16px 16px 14px;
   border-bottom: 1px solid var(--im-line);
   display: flex;
@@ -150,31 +162,26 @@
 }
 
 /* ---------- body layout (KEY FIX) ---------- */
-/* ✅ The whole body scrolls if content is too tall.
-   ✅ Grid aligns stretch, so LEFT always matches RIGHT height. */
+/* ✅ Body is NOT a fixed-height scroller anymore.
+   It shrink-wraps to content -> left image height matches right content height. */
 .imBody {
   padding: 16px;
-  overflow: auto; /* ✅ body scroll (not right-only) */
+  overflow: visible;
   display: grid;
   gap: 16px;
   grid-template-columns: 1.15fr 0.85fr;
   min-width: 0;
-  align-items: stretch; /* ✅ same height columns */
+  align-items: start; /* ✅ important: do NOT stretch based on left image */
 }
-
 /* ✅ BOTH columns stretch to same height */
 .imLeft,
 .imRight {
   min-width: 0;
-  align-self: stretch;
 }
 
 /* ---------- image (dynamic height) ---------- */
-/* ✅ No fixed min-height here.
-   ✅ It will stretch to match RIGHT content height. */
 .imImageWrap {
   width: 100%;
-  height: 100%; /* ✅ fills left column which matches right column */
   border-radius: 10px;
   overflow: hidden;
   border: 1px solid var(--im-line);
@@ -183,11 +190,12 @@
   place-items: center;
 }
 
+
 .imImage {
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: cover; /* fills container */
+  object-fit: cover;
   object-position: center;
 }
 

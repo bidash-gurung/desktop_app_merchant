@@ -342,11 +342,9 @@ export default function HomeItemsGrid({ session }) {
                       <div className="itemPrice" aria-label="Price">
                         {p.hasDiscount ? (
                           <span className="priceStack">
-                            {/* ✅ WAS: taxed actual */}
                             <span className="priceWas">
                               Nu. {money2(p.taxedActual)}
                             </span>
-                            {/* ✅ NOW: discounted from taxed actual */}
                             <span className="priceNow">
                               Nu. {money2(p.discounted)}
                             </span>

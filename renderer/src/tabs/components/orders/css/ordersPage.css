@@ -1,0 +1,68 @@
+:root{
+  --op-bg:#fff;
+  --op-line: rgba(15,16,32,.10);
+  --op-muted: rgba(15,16,32,.62);
+  --op-text:#0f1020;
+  --op-primary:#6a00eb;
+
+  --op-shadow: 0 10px 26px rgba(15,16,32,.08);
+}
+
+.opWrap{
+  padding: 18px;
+}
+
+.opHeaderCard{
+  background: var(--op-bg);
+  border: 1px solid var(--op-line);
+  border-radius: 16px;
+  padding: 14px 14px 12px;
+  box-shadow: 0 6px 18px rgba(15,16,32,.04);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+}
+
+.opTitle{
+  font-size: 16px;
+  font-weight: 1000;
+  color: var(--op-text);
+  line-height: 1.2;
+}
+
+.opSub{
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--op-muted);
+}
+
+.opCountPill{
+  font-size: 12px;
+  font-weight: 1000;
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: var(--op-primary);
+  background: rgba(106,0,235,.10);
+  border: 1px solid rgba(106,0,235,.16);
+}
+
+.opError{
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(239,68,68,.22);
+  background: rgba(239,68,68,.08);
+  color: rgba(185,28,28,.95);
+  font-weight: 900;
+  font-size: 12.5px;
+}
+
+.opTableCard{
+  margin-top: 12px;
+  background: var(--op-bg);
+  border: 1px solid var(--op-line);
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(15,16,32,.04);
+  overflow: hidden;
+}

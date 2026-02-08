@@ -1,0 +1,126 @@
+:root{
+  --ot-line: rgba(15,16,32,.10);
+  --ot-muted: rgba(15,16,32,.62);
+  --ot-text:#0f1020;
+  --ot-primary:#6a00eb;
+}
+
+.otWrap{
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.otTabs{
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.otTab{
+  border: 1px solid rgba(15,16,32,.12);
+  background: rgba(15,16,32,.03);
+  border-radius: 999px;
+  padding: 8px 12px;
+  cursor: pointer;
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  font-weight: 950;
+  font-size: 12.5px;
+  color: rgba(15,16,32,.92);
+}
+
+.otTab.active{
+  border-color: rgba(106,0,235,.35);
+  background: rgba(106,0,235,.10);
+  color: rgba(106,0,235,.95);
+  box-shadow: 0 0 0 3px rgba(106,0,235,.08);
+}
+
+.otTabCount{
+  min-width: 24px;
+  height: 22px;
+  border-radius: 999px;
+  display:grid;
+  place-items:center;
+  font-size: 12px;
+  font-weight: 1000;
+  background: rgba(15,16,32,.06);
+  border: 1px solid rgba(15,16,32,.10);
+  color: rgba(15,16,32,.82);
+}
+
+.otTab.active .otTabCount{
+  background: rgba(106,0,235,.14);
+  border-color: rgba(106,0,235,.22);
+  color: rgba(106,0,235,.95);
+}
+
+.otBar{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.otSearch{
+  position: relative;
+  flex: 1 1 520px;
+  min-width: 280px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(15,16,32,.12);
+  background: rgba(15,16,32,.02);
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  padding: 0 12px;
+}
+
+.otSearchIcon{
+  opacity: .6;
+  font-size: 14px;
+}
+
+.otSearch input{
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+  color: rgba(15,16,32,.92);
+}
+
+.otClear{
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 0;
+  background: rgba(15,16,32,.06);
+  cursor:pointer;
+  font-size: 18px;
+  line-height: 0;
+  display:grid;
+  place-items:center;
+  color: rgba(15,16,32,.7);
+}
+
+.otBtn{
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(106,0,235,.22);
+  background: rgba(106,0,235,.10);
+  color: rgba(106,0,235,.95);
+  font-weight: 950;
+  cursor:pointer;
+}
+
+.otBtn:disabled{
+  opacity: .6;
+  cursor:not-allowed;
+}

@@ -1,0 +1,167 @@
+:root{
+  --otb-line: rgba(15,16,32,.10);
+  --otb-muted: rgba(15,16,32,.62);
+  --otb-text: #0f1020;
+  --otb-bg: #fff;
+}
+
+.otbTableWrap{
+  width: 100%;
+  overflow: auto;
+}
+
+.otbTable{
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 980px;
+}
+
+.otbTable thead th{
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: rgba(255,255,255,.96);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--otb-line);
+  padding: 12px 12px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 1000;
+  color: rgba(15,16,32,.78);
+  white-space: nowrap;
+}
+
+.otbRow{
+  cursor: pointer;
+  background: #fff;
+}
+
+.otbRow td{
+  border-bottom: 1px solid rgba(15,16,32,.08);
+  padding: 10px 12px;   /* ✅ tighter spacing */
+  vertical-align: middle;
+  font-size: 13px;
+  color: rgba(15,16,32,.92);
+}
+
+.otbRow:hover td{
+  background: rgba(106,0,235,.035);
+}
+
+.otbThumb{
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(15,16,32,.10);
+  background: rgba(15,16,32,.03);
+  display:grid;
+  place-items:center;
+}
+
+.otbThumb img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display:block;
+}
+
+.otbNoImg{
+  font-size: 11px;
+  font-weight: 900;
+  color: rgba(15,16,32,.55);
+}
+
+.otbOrderId{
+  font-weight: 1000;
+  letter-spacing: .2px;
+}
+
+.otbCustomer{
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.otbSubText{
+  margin-top: 2px;
+  font-size: 12px;
+  color: rgba(15,16,32,.62);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+}
+
+.otbAddr{
+  max-width: 420px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: rgba(15,16,32,.78);
+}
+
+.otbMoney{
+  text-align: right;
+  font-weight: 1000;
+  white-space: nowrap;
+}
+
+.otbEmpty{
+  padding: 18px 14px;
+  color: rgba(15,16,32,.7);
+  font-size: 13px;
+}
+
+.otbSkelLine{
+  height: 14px;
+  margin: 10px 0;
+  border-radius: 10px;
+  background: rgba(15,16,32,.06);
+  width: 100%;
+}
+
+/* status badge */
+.otbBadge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 1000;
+  border: 1px solid rgba(15,16,32,.12);
+  background: rgba(15,16,32,.05);
+  color: rgba(15,16,32,.85);
+  white-space: nowrap;
+}
+
+.otbBadge.s_CONFIRMED{
+  background: rgba(106,0,235,.10);
+  border-color: rgba(106,0,235,.22);
+  color: rgba(106,0,235,.95);
+}
+.otbBadge.s_READY{
+  background: rgba(16,185,129,.10);
+  border-color: rgba(16,185,129,.22);
+  color: rgba(16,185,129,.95);
+}
+.otbBadge.s_ASSIGNED,
+.otbBadge.s_OUT_FOR_DELIVERY{
+  background: rgba(15,16,32,.08);
+  border-color: rgba(15,16,32,.16);
+  color: rgba(15,16,32,.92);
+}
+.otbBadge.s_PENDING{
+  background: rgba(245,158,11,.10);
+  border-color: rgba(245,158,11,.22);
+  color: rgba(180,83,9,.95);
+}
+.otbBadge.s_SCHEDULED{
+  background: rgba(59,130,246,.10);
+  border-color: rgba(59,130,246,.22);
+  color: rgba(59,130,246,.95);
+}

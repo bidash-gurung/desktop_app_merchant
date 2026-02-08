@@ -1,5 +1,5 @@
 /* tabs/components/home/css/homeItemsGrid.css */
-/* Professional + responsive + clean price layout (tax then discount) */
+/* ✅ Update: equal-height cards across a row, regardless of description length */
 
 :root {
   --hi-bg: #ffffff;
@@ -149,12 +149,13 @@
   white-space: nowrap;
 }
 
+/* ✅ KEY: make grid rows stretch so cards in same row share equal height */
 .homeItemsGrid {
   padding: 14px;
   display: grid;
   gap: 14px;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  align-items: start;
+  align-items: stretch; /* ✅ equal height per row */
 }
 
 .itemCardBtn {
@@ -163,16 +164,20 @@
   border: 0;
   background: transparent;
   cursor: pointer;
+  display: block;   /* ✅ ensures grid item stretches */
+  height: 100%;     /* ✅ take full row height */
 }
 
+/* ✅ Card becomes a full-height grid container */
 .itemCard {
+  height: 100%; /* ✅ fill the stretched grid cell */
   background: #fff;
   border: 1px solid rgba(11, 12, 21, 0.1);
   border-radius: 14px;
   overflow: hidden;
   box-shadow: var(--hi-shadow);
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto 1fr; /* image + body */
   min-width: 0;
   transition:
     transform 120ms ease,
@@ -233,11 +238,14 @@
   background: rgba(239, 68, 68, 0.95);
 }
 
+/* ✅ Body fills remaining space; meta row sticks to bottom consistently */
 .itemBody {
   padding: 14px;
   display: grid;
   gap: 10px;
   min-width: 0;
+
+  grid-template-rows: auto auto 1fr auto; /* top, cat, desc, meta */
 }
 
 .itemTop {
@@ -300,25 +308,32 @@
   color: var(--hi-primary);
 }
 
+/* ✅ Fixed visual height (3 lines max) so cards don't grow/shrink */
 .itemDesc {
   font-size: 12.5px;
   color: rgba(15, 16, 32, 0.65);
   line-height: 1.45;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 3;          /* your clamp */
   -webkit-box-orient: vertical;
   overflow: hidden;
+
+  /* ✅ ensure same vertical space even if 1 line */
+  min-height: calc(1.45em * 3);   /* 3 lines reserved */
 }
+
 .itemDesc.empty {
   color: rgba(15, 16, 32, 0.45);
 }
 
+/* ✅ stick to bottom because itemBody uses rows and desc is the 1fr row */
 .itemMetaRow {
   margin-top: 2px;
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+  align-self: end;
 }
 
 .chip {
@@ -365,6 +380,7 @@
   display: grid;
   gap: 14px;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  align-items: stretch;
 }
 .itemSkel {
   border: 1px solid rgba(15, 16, 32, 0.1);
@@ -420,6 +436,7 @@
     padding: 12px;
     gap: 12px;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    align-items: stretch;
   }
 
   .itemImgWrap,
@@ -436,11 +453,16 @@
   .priceNow {
     font-size: 12.5px;
   }
+
+  .itemDesc {
+    min-height: calc(1.45em * 3);
+  }
 }
 
 @media (max-width: 420px) {
   .homeItemsGrid,
   .homeItemsSkeletonGrid {
     grid-template-columns: 1fr;
+    align-items: stretch;
   }
 }

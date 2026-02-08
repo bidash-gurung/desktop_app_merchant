@@ -338,9 +338,7 @@ export default function LoginScreen({ onLoginSuccess }) {
                       autoComplete="tel"
                     />
                   </div>
-                  <div className="hint">
-                    We’ll send as +975{phone || "17XXXXXX"} (no spaces)
-                  </div>
+                  
                 </div>
               )}
 
