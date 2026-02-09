@@ -32,6 +32,162 @@ body {
     sans-serif;
 }
 
+/* ✅ Toast / Floating notifications (added) */
+.toastWrap {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 9999;
+  display: grid;
+  gap: 10px;
+  width: min(380px, calc(100vw - 32px));
+  pointer-events: none; /* allow underlying UI; toastCard enables pointer events */
+}
+.toastCard {
+  pointer-events: auto;
+  background: rgb(130 255 150 / 72%);
+  border: 2px solid rgb(38 255 44);
+  border-radius: 6px;
+  box-shadow: 0 12px 30px rgba(15, 16, 32, 0.12);
+  padding: 12px 12px 10px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  animation: toastIn 160ms ease-out;
+}
+.toast {
+  pointer-events: auto;
+  text-align: left;
+  background: #fff;
+  border: 1px solid rgba(15, 16, 32, 0.1);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(15, 16, 32, 0.18);
+  padding: 12px 12px 10px;
+  cursor: pointer;
+  transform: translateY(0);
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease;
+}
+
+.toast:hover {
+  transform: translateY(-1px);
+  border-color: rgba(106, 0, 235, 0.22);
+  box-shadow: 0 14px 46px rgba(15, 16, 32, 0.2);
+}
+.toastText {
+  font-size: 12px;
+  color: rgba(15, 16, 32, 0.75);
+  line-height: 1.35;
+  max-height: 2.8em;
+  overflow: hidden;
+}
+.toastTop {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.toastTitle {
+  font-weight: 950;
+  font-size: 13px;
+  color: rgba(15, 16, 32, 0.92);
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.toastX {
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 16, 32, 0.1);
+  background: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  line-height: 1;
+  font-size: 18px;
+  display: grid;
+  place-items: center;
+  color: rgba(15, 16, 32, 0.75);
+}
+.toastX:hover {
+  background: rgba(106, 0, 235, 0.1);
+  border-color: rgba(106, 0, 235, 0.18);
+  color: rgba(15, 16, 32, 0.86);
+}
+.toastClose {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 16, 32, 0.1);
+  font-weight: 900;
+  color: #101020;
+  background: #fff;
+  flex: 0 0 auto;
+}
+
+.toastClose:hover {
+  background: rgba(106, 0, 235, 0.08);
+  border-color: rgba(106, 0, 235, 0.22);
+}
+
+.toastBody {
+  margin-top: 8px;
+  display: grid;
+  gap: 8px;
+}
+
+.toastMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.toastPill {
+  font-size: 11px;
+  font-weight: 900;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(106, 0, 235, 0.18);
+  background: rgba(106, 0, 235, 0.08);
+  color: rgba(106, 0, 235, 0.92);
+}
+.toastTime {
+  margin-left: auto;
+  font-size: 11px;
+  color: rgba(15, 16, 32, 0.55);
+  font-weight: 800;
+}
+/* responsive toast */
+@media (max-width: 520px) {
+  .toastWrap {
+    right: 12px;
+    bottom: 12px;
+    width: min(360px, calc(100vw - 24px));
+  }
+}
+
+/* ✅ optional subtle appear animation */
+@keyframes toastIn {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.toast {
+  animation: toastIn 140ms ease-out;
+}
+
+/* ---------- app layout ---------- */
 .app {
   width: 100%;
   height: 100%;
@@ -315,7 +471,7 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 240px; /* ✅ allow full names more */
+  max-width: 240px;
 }
 
 /* avatar */
@@ -359,8 +515,6 @@ body {
 }
 
 /* ---------- responsive ---------- */
-
-/* reduce name width on smaller screens */
 @media (max-width: 720px) {
   .topUserName {
     max-width: 180px;
@@ -454,7 +608,6 @@ body {
   }
 }
 
-/* small: keep right clean */
 @media (max-width: 520px) {
   .top {
     grid-template-columns: 1fr 1fr 1fr;

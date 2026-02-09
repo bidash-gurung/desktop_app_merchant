@@ -134,6 +134,7 @@ export default function LoginScreen({ onLoginSuccess }) {
     }
 
     let body = {};
+
     if (tab === "email") {
       const em = email.trim();
       if (!em) {
@@ -144,7 +145,8 @@ export default function LoginScreen({ onLoginSuccess }) {
         });
         return;
       }
-      body = { email: em, password: pass };
+      // ✅ add desktop=true
+      body = { email: em, password: pass, desktop: true };
     } else {
       const rawDigits = digitsOnly(phone);
       if (!rawDigits) {
@@ -156,9 +158,9 @@ export default function LoginScreen({ onLoginSuccess }) {
         return;
       }
 
-      // ✅ Send +975 + digits, with NO spaces: +97517XXXXXX
       const fullPhone = `+975${rawDigits}`;
-      body = { phone: fullPhone, password: pass };
+      // ✅ add desktop=true
+      body = { phone: fullPhone, password: pass, desktop: true };
     }
 
     setLoading(true);
@@ -181,7 +183,6 @@ export default function LoginScreen({ onLoginSuccess }) {
         return;
       }
 
-      // ✅ Only store remembered values when login succeeds
       try {
         if (remember) {
           const saved =
@@ -338,7 +339,6 @@ export default function LoginScreen({ onLoginSuccess }) {
                       autoComplete="tel"
                     />
                   </div>
-                  
                 </div>
               )}
 

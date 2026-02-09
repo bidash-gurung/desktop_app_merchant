@@ -1,4 +1,4 @@
-// MainScreen.jsx
+// src/MainScreen.jsx
 import React from "react";
 import "./css/main.css";
 
@@ -8,9 +8,13 @@ import AddItemsTab from "./tabs/AddItemsTab";
 import NotificationsTab from "./tabs/NotificationsTab";
 import PayoutsTab from "./tabs/PayoutsTab";
 
+import { connectSocket, disconnectSocket } from "./realtime/socket";
+
 const MERCHANT_LOGO_PREFIX = import.meta.env.VITE_MERCHANT_LOGO;
 const PROFILE_IMAGE_PREFIX = import.meta.env.VITE_PROFILE_IMAGE;
 const PROFILE_ENDPOINT = import.meta.env.VITE_PROFILE_ENDPOINT; // https://grab.newedge.bt/driver/api/profile/{user_id}
+
+const ACTIVE_TAB_KEY = "merchant_active_tab_v1";
 
 const TABS = [
   { id: "home", label: "Home", icon: HomeIcon },
@@ -53,8 +57,33 @@ function buildUrl(base, id) {
   return base.endsWith("/") ? `${base}${id}` : `${base}/${id}`;
 }
 
+function isNewOrderNotify(ev) {
+  // server sends:
+  // { id, type, orderId, business_id, createdAt, data:{title, body, totals} }
+  const t = String(ev?.type || "").toLowerCase();
+  return t.includes("order:create") || t.includes("order:create".toLowerCase());
+}
+
+function fmtMoney(v) {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return "";
+  return `Nu. ${n}`;
+}
+
 export default function MainScreen({ session, onLogout }) {
-  const [active, setActive] = React.useState("home");
+  // ✅ keep active tab after refresh
+  const [active, setActive] = React.useState(() => {
+    const saved = localStorage.getItem(ACTIVE_TAB_KEY);
+    return saved || "home";
+  });
+
+  React.useEffect(() => {
+    try {
+      localStorage.setItem(ACTIVE_TAB_KEY, active);
+    } catch {
+      // Ignore localStorage errors
+    }
+  }, [active]);
 
   const [bizLogoBroken, setBizLogoBroken] = React.useState(false);
 
@@ -74,6 +103,13 @@ export default function MainScreen({ session, onLogout }) {
     payload?.data?.token?.access_token ||
     payload?.access_token ||
     payload?.data?.access_token ||
+    null;
+
+  const businessId =
+    user?.business_id ??
+    payload?.business_id ??
+    payload?.data?.business_id ??
+    user?.businessId ??
     null;
 
   const businessName = user?.business_name || "Merchant";
@@ -179,6 +215,144 @@ export default function MainScreen({ session, onLogout }) {
     }
   }
 
+  /* ------------------- ✅ Floating Toast Notifications ------------------- */
+  const [toasts, setToasts] = React.useState([]);
+
+  const removeToast = React.useCallback((id) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
+  const pushToast = React.useCallback((ev) => {
+    const id = String(ev?.id || `${Date.now()}-${Math.random()}`);
+    const title = ev?.data?.title || "New notification";
+    const body = ev?.data?.body || "";
+    const orderId = ev?.orderId ?? ev?.order_id ?? null;
+
+    const totals = ev?.data?.totals || null;
+    const totalAmount =
+      totals && totals.total_amount != null
+        ? fmtMoney(totals.total_amount)
+        : "";
+
+    const item = {
+      id,
+      ts: Date.now(),
+      title,
+      body,
+      orderId,
+      totalAmount,
+      raw: ev,
+    };
+
+    // ✅ keep it until user clicks X or clicks the toast
+    setToasts((prev) => [item, ...prev].slice(0, 6)); // you can increase the max
+  }, []);
+
+  const onToastClick = React.useCallback(
+    (t) => {
+      // keep logic simple: jump to Orders tab to view
+      setActive("orders");
+      try {
+        localStorage.setItem(ACTIVE_TAB_KEY, "orders");
+      } catch {
+        // Ignore localStorage errors
+      }
+      removeToast(t.id);
+    },
+    [removeToast],
+  );
+
+  const requestNotifPermission = React.useCallback(() => {
+    try {
+      if (!("Notification" in window)) return;
+      if (Notification.permission === "default")
+        Notification.requestPermission();
+    } catch {
+      // Ignore notification permission errors
+    }
+  }, []);
+
+  /* ------------------- ✅ SOCKET.IO realtime (GLOBAL) ------------------- */
+  React.useEffect(() => {
+    // connect once per user/session
+    if (!userId || !businessId) {
+      console.log("[socket] ⚠️ not connecting (missing ids)", {
+        userId,
+        businessId,
+      });
+      return;
+    }
+
+    // DEV_NOAUTH is true on your backend right now
+    // so we must pass devUserId + devRole (merchant) + business_id
+    const s = connectSocket({
+      token, // for later (when DEV_NOAUTH=false)
+      devUserId: userId,
+      devRole: "merchant", // ✅ static
+      business_id: businessId,
+      business_ids: [businessId],
+      businessId,
+    });
+
+    if (!s) return;
+
+    requestNotifPermission();
+
+    const onConnect = () => {
+      console.log("[socket] ✅ connected (MainScreen)", {
+        id: s?.id,
+        userId,
+        businessId,
+      });
+    };
+
+    const onDisconnect = (reason) =>
+      console.log("[socket] ❌ disconnected (MainScreen)", reason);
+
+    const onConnectError = (err) =>
+      console.log("[socket] ❌ connect_error (MainScreen)", err);
+
+    // ✅ IMPORTANT: server emits "notify"
+    const onNotify = (data) => {
+      console.log("[socket] 🔔 notify:", data);
+
+      // show toast for new order (or show for any notify — you can decide)
+      if (isNewOrderNotify(data)) pushToast(data);
+      else pushToast(data); // keep it on for now so you see everything
+    };
+
+    // optional status events from server
+    const onOrderStatus = (data) =>
+      console.log("[socket] 📦 order:status:", data);
+
+    // debug: show all events
+    const onAny = (event, ...args) =>
+      console.log(`[socket] 📩 event "${event}"`, ...args);
+
+    s.on("connect", onConnect);
+    s.on("disconnect", onDisconnect);
+    s.on("connect_error", onConnectError);
+
+    s.on("notify", onNotify);
+    s.on("order:status", onOrderStatus);
+
+    if (typeof s.onAny === "function") s.onAny(onAny);
+
+    return () => {
+      try {
+        s.off("connect", onConnect);
+        s.off("disconnect", onDisconnect);
+        s.off("connect_error", onConnectError);
+        s.off("notify", onNotify);
+        s.off("order:status", onOrderStatus);
+        if (typeof s.offAny === "function") s.offAny(onAny);
+      } catch {
+        // Ignore socket cleanup errors
+      }
+      disconnectSocket();
+    };
+  }, [userId, businessId, token, pushToast, requestNotifPermission]);
+
   return (
     <div className="app">
       {/* Sidebar */}
@@ -213,7 +387,14 @@ export default function MainScreen({ session, onLogout }) {
                 type="button"
                 title={t.label}
                 className={`navBtn ${isActive ? "active" : ""}`}
-                onClick={() => setActive(t.id)}
+                onClick={() => {
+                  setActive(t.id);
+                  try {
+                    localStorage.setItem(ACTIVE_TAB_KEY, t.id);
+                  } catch {
+                    // Ignore localStorage errors
+                  }
+                }}
               >
                 <span className="navIco">
                   <Icon />
@@ -266,6 +447,7 @@ export default function MainScreen({ session, onLogout }) {
               </button>
             </div>
           </div>
+
           <div className="topCenter" title={address}>
             {address ? (
               <div className="topAddress">
@@ -280,12 +462,10 @@ export default function MainScreen({ session, onLogout }) {
           </div>
 
           <div className="topRight">
-            {/* ✅ full name */}
             <div className="topUserName" title={fullUserName}>
               {fullUserName}
             </div>
 
-            {/* ✅ bigger avatar */}
             <div className="topProfile topProfileLg" title={fullUserName}>
               {profileLoading ? (
                 <div
@@ -313,6 +493,54 @@ export default function MainScreen({ session, onLogout }) {
         </header>
 
         <div className="panel">{renderContent()}</div>
+
+        {/* ✅ Floating Toasts (Global) */}
+        <div className="toastWrap" aria-live="polite" aria-relevant="additions">
+          {toasts.map((t) => (
+            <div
+              key={t.id}
+              className="toastCard"
+              role="button"
+              tabIndex={0}
+              onClick={() => onToastClick(t)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") onToastClick(t);
+              }}
+              title="Click to open Orders"
+            >
+              <div className="toastTop">
+                <div className="toastTitle">{t.title}</div>
+                <button
+                  type="button"
+                  className="toastX"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeToast(t.id);
+                  }}
+                  aria-label="Dismiss"
+                  title="Dismiss"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="toastBody">
+                {t.body ? <div className="toastText">{t.body}</div> : null}
+                <div className="toastMeta">
+                  {t.orderId ? (
+                    <span className="toastPill">Order #{t.orderId}</span>
+                  ) : null}
+                  {t.totalAmount ? (
+                    <span className="toastPill">{t.totalAmount}</span>
+                  ) : null}
+                  <span className="toastTime">
+                    {new Date(t.ts).toLocaleTimeString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </main>
     </div>
   );
