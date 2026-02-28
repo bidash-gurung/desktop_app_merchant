@@ -5,6 +5,7 @@ import "./css/main.css";
 import HomeTab from "./tabs/HomeTab";
 import OrdersTab from "./tabs/OrdersTab";
 import AddItemsTab from "./tabs/AddItemsTab";
+import BannerTab from "./tabs/BannerTab"; // ✅ NEW
 import NotificationsTab from "./tabs/NotificationsTab";
 import PayoutsTab from "./tabs/PayoutsTab";
 
@@ -20,6 +21,7 @@ const TABS = [
   { id: "home", label: "Home", icon: HomeIcon },
   { id: "orders", label: "Orders", icon: OrdersIcon },
   { id: "add", label: "Add Items", icon: AddIcon },
+  { id: "banner", label: "Banner", icon: BannerIcon }, // ✅ NEW (after Add Items)
   { id: "notifications", label: "Notifications", icon: BellIcon },
   { id: "payouts", label: "Payouts", icon: WalletIcon },
 ];
@@ -206,6 +208,8 @@ export default function MainScreen({ session, onLogout }) {
         return <OrdersTab session={session} />;
       case "add":
         return <AddItemsTab session={session} />;
+      case "banner": // ✅ NEW
+        return <BannerTab session={session} />;
       case "notifications":
         return <NotificationsTab session={session} />;
       case "payouts":
@@ -597,6 +601,42 @@ function AddIcon() {
     </svg>
   );
 }
+
+/* ✅ NEW: Banner icon (billboard/banner) */
+function BannerIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      aria-hidden="true"
+    >
+      {/* poles */}
+      <path
+        d="M6 3v18M18 3v18"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      {/* banner board */}
+      <path
+        d="M7 6h10a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H7a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      {/* ad lines */}
+      <path
+        d="M9 9h6M9 12h6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 function BellIcon() {
   return (
     <svg

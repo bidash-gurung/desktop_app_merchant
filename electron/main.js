@@ -3,11 +3,15 @@ const { app, BrowserWindow, screen, ipcMain } = require("electron");
 const path = require("path");
 
 function createWindow() {
-  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  const display = screen.getPrimaryDisplay();
+
+  // ✅ keep original behavior (workAreaSize) but add a tiny bottom gap
+  const { width, height } = display.workAreaSize;
+  const TASKBAR_HOVER_GAP = 2; // ✅ allows Windows auto-hide taskbar hover to work
 
   const win = new BrowserWindow({
     width,
-    height,
+    height: Math.max(1, height - TASKBAR_HOVER_GAP),
     show: true,
 
     // ✅ no OS titlebar => no dragging
@@ -30,9 +34,9 @@ function createWindow() {
 
   // ✅ enforce exact size
   win.setResizable(false);
-  win.setMinimumSize(width, height);
-  win.setMaximumSize(width, height);
-  win.setSize(width, height);
+  win.setMinimumSize(width, Math.max(1, height - TASKBAR_HOVER_GAP));
+  win.setMaximumSize(width, Math.max(1, height - TASKBAR_HOVER_GAP));
+  win.setSize(width, Math.max(1, height - TASKBAR_HOVER_GAP));
 
   // ✅ keep it pinned top-left
   win.setPosition(0, 0);

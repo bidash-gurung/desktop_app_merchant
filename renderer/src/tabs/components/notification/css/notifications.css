@@ -1,0 +1,447 @@
+/* src/tabs/components/notification_css/notifications.css */
+
+/* ✅ entire page area */
+.ntPage {
+  height: 100%;
+  display: flex;
+  justify-content: center; /* keep in center */
+  align-items: stretch;
+}
+
+/* ✅ centered container */
+.ntContainer {
+  width: 100%;
+  max-width: 1100px; /* centered layout */
+  padding: 18px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ✅ sticky top area (header + tabs + error) */
+.ntSticky {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(246, 247, 251, 0.96);
+  backdrop-filter: blur(8px);
+  padding-bottom: 12px;
+}
+
+/* Header */
+.ntHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.ntTitle {
+  font-size: 34px;
+  font-weight: 950;
+  letter-spacing: 0.2px;
+  margin: 0;
+}
+
+.ntHeaderRight {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* ✅ the list area scrolls */
+.ntScroll {
+  flex: 1;
+  overflow: auto;
+  padding-right: 6px; /* small spacing from scrollbar */
+}
+
+/* Buttons */
+.ntBtn {
+  border: 1px solid rgba(10, 10, 15, 0.12);
+  background: rgba(10, 10, 15, 0.06);
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    background 120ms ease;
+  user-select: none;
+}
+
+.ntBtn:hover {
+  background: rgba(10, 10, 15, 0.09);
+  transform: translateY(-1px);
+}
+
+.ntBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ntBtnSoft {
+  background: rgba(10, 10, 15, 0.03);
+}
+
+.ntBtnPrimary {
+  background: rgba(106, 0, 235, 0.12);
+  border-color: rgba(106, 0, 235, 0.25);
+}
+
+.ntBtnDanger {
+  background: rgba(235, 0, 60, 0.1);
+  border-color: rgba(235, 0, 60, 0.22);
+}
+
+/* Switch */
+.ntSwitch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(10, 10, 15, 0.1);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.ntSwitch input {
+  display: none;
+}
+
+.ntSwitchUi {
+  width: 46px;
+  height: 26px;
+  border-radius: 999px;
+  background: rgba(10, 10, 15, 0.12);
+  position: relative;
+}
+
+.ntSwitchUi::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition:
+    left 140ms ease,
+    background 140ms ease;
+}
+
+.ntSwitch input:checked + .ntSwitchUi {
+  background: rgba(106, 0, 235, 0.35);
+}
+
+.ntSwitch input:checked + .ntSwitchUi::after {
+  left: 23px;
+}
+
+.ntSwitchText {
+  font-size: 14px;
+  font-weight: 900;
+  opacity: 0.85;
+}
+
+/* Top tabs */
+.ntTopTabs {
+  display: flex;
+  gap: 12px;
+  margin: 12px 0 14px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(10, 10, 15, 0.1);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.ntTabBtn {
+  border: 1px solid rgba(10, 10, 15, 0.12);
+  background: rgba(10, 10, 15, 0.03);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: inline-flex;
+  gap: 12px;
+  align-items: center;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    transform 120ms ease;
+  font-weight: 950;
+}
+
+.ntTabBtn:hover {
+  background: rgba(10, 10, 15, 0.06);
+  transform: translateY(-1px);
+}
+
+.ntTabBtn.isActive {
+  background: rgba(106, 0, 235, 0.14);
+  border-color: rgba(106, 0, 235, 0.25);
+}
+
+.ntTabLabel {
+  font-size: 15px;
+  opacity: 0.92;
+}
+
+.ntTabCount {
+  font-size: 13px;
+  font-weight: 950;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(10, 10, 15, 0.12);
+  background: rgba(10, 10, 15, 0.04);
+}
+
+.ntTabCount.isActive {
+  border-color: rgba(106, 0, 235, 0.25);
+  background: rgba(106, 0, 235, 0.1);
+}
+
+/* Error */
+.ntError {
+  margin: 10px 0 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(235, 0, 60, 0.22);
+  background: rgba(235, 0, 60, 0.08);
+  font-weight: 900;
+}
+
+/* List */
+.ntList {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  padding-bottom: 18px;
+}
+
+.ntEmpty {
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px dashed rgba(10, 10, 15, 0.18);
+  background: rgba(255, 255, 255, 0.7);
+  font-weight: 900;
+  opacity: 0.75;
+}
+
+/* Cards (keep your existing card styles) */
+.ntCard {
+  border-radius: 18px;
+  border: 1px solid rgba(10, 10, 15, 0.1);
+  background: rgba(255, 255, 255, 0.75);
+  padding: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+}
+
+.ntCard.isUnread {
+  border-color: rgba(106, 0, 235, 0.24);
+  box-shadow: 0 10px 30px rgba(106, 0, 235, 0.08);
+}
+
+.ntCardTitleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ntCardTitle {
+  font-size: 15px;
+  font-weight: 950;
+  letter-spacing: 0.1px;
+}
+
+.ntCardRight {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.ntCardMeta {
+  margin-top: 8px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  opacity: 0.75;
+  font-weight: 900;
+}
+
+.ntMetaItem {
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(10, 10, 15, 0.08);
+  background: rgba(10, 10, 15, 0.03);
+}
+
+.ntCardBody {
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  opacity: 0.92;
+}
+
+.ntCardActions {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ntPill {
+  font-size: 12px;
+  font-weight: 950;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(10, 10, 15, 0.1);
+  background: rgba(10, 10, 15, 0.03);
+}
+
+.ntPill.success {
+  background: rgba(0, 200, 120, 0.12);
+  border-color: rgba(0, 200, 120, 0.22);
+}
+.ntPill.warn {
+  background: rgba(245, 160, 0, 0.12);
+  border-color: rgba(245, 160, 0, 0.22);
+}
+.ntPill.danger {
+  background: rgba(235, 0, 60, 0.1);
+  border-color: rgba(235, 0, 60, 0.22);
+}
+
+/* ===================== DRAWER (FIXED OVERLAY) ===================== */
+.ntDrawerOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999; /* above everything */
+  display: block;
+}
+
+.ntDrawerBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 10, 15, 0.38);
+  backdrop-filter: blur(6px);
+}
+
+.ntDrawerPanel {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  bottom: 12px;
+  width: min(520px, calc(100vw - 24px));
+  border-radius: 18px;
+  border: 1px solid rgba(10, 10, 15, 0.12);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: ntDrawerIn 140ms ease-out;
+}
+
+@keyframes ntDrawerIn {
+  from {
+    transform: translateX(12px);
+    opacity: 0.8;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.ntDrawerHeader {
+  padding: 14px 14px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid rgba(10, 10, 15, 0.08);
+}
+
+.ntDrawerHeaderText {
+  min-width: 0;
+}
+
+.ntDrawerTitle {
+  font-size: 16px;
+  font-weight: 950;
+  letter-spacing: 0.1px;
+  line-height: 1.25;
+  margin: 0;
+  word-break: break-word;
+}
+
+.ntDrawerSub {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 900;
+  opacity: 0.65;
+}
+
+.ntDrawerClose {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(10, 10, 15, 0.12);
+  background: rgba(10, 10, 15, 0.04);
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.ntDrawerClose:hover {
+  background: rgba(10, 10, 15, 0.07);
+}
+
+.ntDrawerBody {
+  padding: 14px;
+  overflow: auto; /* ✅ drawer content scrolls */
+}
+
+.ntKV {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.ntK {
+  font-size: 12px;
+  font-weight: 950;
+  opacity: 0.65;
+}
+
+.ntV {
+  font-size: 13px;
+  font-weight: 900;
+  opacity: 0.9;
+  word-break: break-word;
+}
+
+.ntDivider {
+  margin: 12px 0;
+  border-top: 1px solid rgba(10, 10, 15, 0.1);
+}
+
+.ntLongText {
+  font-size: 13px;
+  line-height: 1.55;
+  opacity: 0.92;
+  font-weight: 700;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

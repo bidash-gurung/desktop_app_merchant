@@ -1,0 +1,1118 @@
+/* src/tabs/components/banners_css/banners.css */
+
+/* ===================== PAGE WRAP ===================== */
+.bnWrap {
+  padding: 18px;
+}
+
+/* ===================== HEADER ===================== */
+.bnHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.bnTitle {
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  margin: 0;
+}
+
+.bnSub {
+  margin-top: 6px;
+  opacity: 0.75;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.bnHeaderRight {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* ===================== TOOLBAR ===================== */
+.bnToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(10, 10, 15, 0.08);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow:
+    0 8px 30px rgba(16, 24, 40, 0.06),
+    0 1px 0 rgba(16, 24, 40, 0.03);
+  backdrop-filter: blur(10px);
+}
+
+.bnToolbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bnToolbarRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.bnLabel {
+  font-size: 12px;
+  font-weight: 800;
+  opacity: 0.75;
+  color: rgba(10, 10, 15, 0.85);
+}
+
+.bnHint {
+  font-size: 12px;
+  opacity: 0.6;
+  color: rgba(10, 10, 15, 0.7);
+}
+
+.bnMuted {
+  opacity: 0.65;
+}
+
+.bnDivider {
+  height: 1px;
+  background: rgba(20, 20, 30, 0.08);
+  margin: 14px 0;
+}
+
+/* ===================== BUTTONS ===================== */
+.bnBtn {
+  border: 1px solid rgba(15, 18, 25, 0.12);
+  background: rgba(255, 255, 255, 0.9);
+  color: rgba(10, 10, 15, 0.92);
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-weight: 850;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    background 120ms ease,
+    border 120ms ease,
+    opacity 120ms ease;
+  box-shadow:
+    0 8px 18px rgba(16, 24, 40, 0.06),
+    0 1px 0 rgba(16, 24, 40, 0.04);
+}
+
+.bnBtn:hover {
+  background: rgba(255, 255, 255, 1);
+  box-shadow:
+    0 12px 26px rgba(16, 24, 40, 0.09),
+    0 1px 0 rgba(16, 24, 40, 0.05);
+  border-color: rgba(16, 24, 40, 0.16);
+}
+
+.bnBtn:active {
+  transform: translateY(1px);
+}
+
+.bnBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.bnPrimary {
+  background: rgba(106, 0, 235, 0.12);
+  border-color: rgba(106, 0, 235, 0.28);
+  color: rgba(12, 10, 20, 0.95);
+}
+
+.bnPrimary:hover {
+  background: rgba(106, 0, 235, 0.16);
+  border-color: rgba(106, 0, 235, 0.38);
+}
+
+.bnSecondary:hover,
+.bnGhost:hover {
+  background: rgba(255, 255, 255, 1);
+}
+
+.bnDanger {
+  background: rgba(255, 59, 59, 0.1);
+  border-color: rgba(255, 59, 59, 0.26);
+  color: rgba(25, 10, 10, 0.92);
+}
+
+.bnDanger:hover {
+  background: rgba(255, 59, 59, 0.14);
+  border-color: rgba(255, 59, 59, 0.36);
+}
+
+.bnGhost {
+  padding: 10px 10px;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* ===================== TOGGLE GROUP ===================== */
+.bnToggle {
+  display: inline-flex;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 18, 25, 0.12);
+  background: rgba(255, 255, 255, 0.9);
+  overflow: hidden;
+  box-shadow:
+    0 10px 24px rgba(16, 24, 40, 0.06),
+    0 1px 0 rgba(16, 24, 40, 0.04);
+}
+
+.bnToggleBtn {
+  border: 0;
+  background: transparent;
+  color: rgba(10, 10, 15, 0.86);
+  padding: 9px 12px;
+  font-weight: 900;
+  font-size: 13px;
+  cursor: pointer;
+  opacity: 0.75;
+  transition:
+    background 120ms ease,
+    opacity 120ms ease;
+}
+
+.bnToggleBtn.active {
+  opacity: 1;
+  color: rgba(10, 10, 15, 0.95);
+  background: rgba(106, 0, 235, 0.12);
+}
+
+/* ===================== LIST GRID (RESPONSIVE) ===================== */
+.bnList {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 1100px) {
+  .bnList {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===================== CARD (LANDSCAPE IMAGE) ===================== */
+.bnCard {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 0;
+  border-radius: 18px;
+  border: 1px solid rgba(16, 24, 40, 0.1);
+  background: rgba(255, 255, 255, 0.86);
+  overflow: hidden;
+  box-shadow:
+    0 18px 50px rgba(16, 24, 40, 0.08),
+    0 1px 0 rgba(16, 24, 40, 0.04);
+}
+
+@media (max-width: 740px) {
+  .bnCard {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bnCardImg {
+  background: linear-gradient(
+    180deg,
+    rgba(16, 24, 40, 0.06),
+    rgba(16, 24, 40, 0.02)
+  );
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  min-height: 180px;
+}
+
+.bnCardImg img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.bnCardImgPh {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(10, 10, 15, 0.55);
+  font-weight: 850;
+  font-size: 13px;
+}
+
+.bnCardBody {
+  padding: 14px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.bnCardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bnCardTitle {
+  font-weight: 950;
+  font-size: 16px;
+  line-height: 1.25;
+  min-width: 0;
+  color: rgba(10, 10, 15, 0.95);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bnCardBadges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.bnCardDesc {
+  margin-top: 8px;
+  color: rgba(10, 10, 15, 0.72);
+  font-size: 13px;
+  line-height: 1.5;
+  min-height: 40px;
+  overflow-wrap: anywhere;
+}
+
+/* Meta bar */
+.bnCardMeta {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 520px) {
+  .bnCardMeta {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bnMetaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(16, 24, 40, 0.1);
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.bnMetaLbl {
+  font-size: 12px;
+  color: rgba(10, 10, 15, 0.6);
+  font-weight: 850;
+}
+
+.bnMetaVal {
+  font-size: 12px;
+  font-weight: 950;
+  color: rgba(10, 10, 15, 0.92);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Actions */
+.bnCardActions {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.bnCardSpacer {
+  flex: 1;
+}
+
+/* ===================== PILLS ===================== */
+.bnPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(16, 24, 40, 0.1);
+  background: rgba(255, 255, 255, 0.85);
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0.25px;
+  color: rgba(10, 10, 15, 0.88);
+}
+
+.bnPill.success {
+  border-color: rgba(24, 196, 111, 0.22);
+  background: rgba(24, 196, 111, 0.12);
+}
+
+.bnPill.warn {
+  border-color: rgba(255, 187, 0, 0.25);
+  background: rgba(255, 187, 0, 0.14);
+}
+
+.bnPill.food {
+  border-color: rgba(106, 0, 235, 0.25);
+  background: rgba(106, 0, 235, 0.12);
+}
+
+.bnPill.mart {
+  border-color: rgba(0, 160, 255, 0.22);
+  background: rgba(0, 160, 255, 0.12);
+}
+
+/* ===================== EMPTY STATE ===================== */
+.bnEmpty {
+  grid-column: 1 / -1;
+  border-radius: 18px;
+  border: 1px dashed rgba(16, 24, 40, 0.18);
+  background: rgba(255, 255, 255, 0.86);
+  padding: 26px;
+  text-align: center;
+  box-shadow:
+    0 18px 50px rgba(16, 24, 40, 0.06),
+    0 1px 0 rgba(16, 24, 40, 0.04);
+}
+
+.bnEmptyTitle {
+  font-weight: 950;
+  font-size: 15px;
+  color: rgba(10, 10, 15, 0.92);
+}
+
+.bnEmptyDesc {
+  margin-top: 8px;
+  color: rgba(10, 10, 15, 0.7);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.bnEmptyAct {
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+}
+
+/* ===================== ALERTS (LIGHT, PROFESSIONAL) ===================== */
+.bnAlert {
+  border-radius: 16px;
+  border: 1px solid rgba(16, 24, 40, 0.12);
+  background: rgba(16, 24, 40, 0.03);
+  padding: 14px 14px;
+  box-shadow:
+    0 10px 26px rgba(16, 24, 40, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  margin-bottom: 16px;
+  animation: slideDown 0.25s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bnAlertTitle {
+  font-weight: 950;
+  margin-bottom: 8px;
+  color: rgba(10, 10, 15, 0.95);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bnAlertBody {
+  color: rgba(10, 10, 15, 0.82);
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.bnAlertTitle::before {
+  content: "ℹ️";
+  font-size: 16px;
+}
+
+/* Warning */
+.bnAlert.warn {
+  border-color: rgba(255, 187, 0, 0.3);
+  background: rgba(255, 187, 0, 0.1);
+}
+
+.bnAlert.warn .bnAlertTitle::before {
+  content: "⚠️";
+}
+
+/* Danger */
+.bnAlert.danger {
+  border-color: rgba(255, 59, 59, 0.28);
+  background: rgba(255, 59, 59, 0.1);
+}
+
+.bnAlert.danger .bnAlertTitle::before {
+  content: "⚠️";
+}
+
+.bnAlert.critical {
+  border-color: rgba(255, 0, 0, 0.38);
+  background: rgba(255, 0, 0, 0.1);
+}
+
+/* ===================== MODAL (LIGHT / WHITE THEME) ===================== */
+/* ✅ Only adjusted modal/form styles below. Everything else remains unchanged. */
+
+/* Overlay */
+.bnModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 18, 25, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 9999;
+}
+.bnSubText {
+  color: rgba(222, 46, 23, 0.72);
+}
+/* Panel (this is what Modal.jsx uses) */
+.bnModalPanel {
+  width: min(700px, 100%); /* ✅ slightly narrower */
+  max-height: calc(100vh - 36px);
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+  border: 1px solid rgba(16, 24, 40, 0.12);
+  background: #fff;
+  overflow: hidden;
+  padding: 20px;
+  box-shadow:
+    0 28px 90px rgba(0, 0, 0, 0.25),
+    0 1px 0 rgba(16, 24, 40, 0.06);
+}
+
+/* IMPORTANT:
+   You had .bnModal (40% width) which can break layout depending on DOM.
+   Keep it safe, but do NOT let it fight .bnModalPanel.
+   If .bnModal exists elsewhere, keep it consistent and non-conflicting. */
+.bnModal {
+  width: min(700px, 100%);
+  max-height: calc(100vh - 36px);
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+  border: 1px solid rgba(16, 24, 40, 0.12);
+  background: #ffffff;
+  color: rgba(10, 10, 15, 0.92);
+  box-shadow:
+    0 28px 90px rgba(0, 0, 0, 0.25),
+    0 1px 0 rgba(16, 24, 40, 0.06);
+  overflow: hidden;
+}
+
+/* Header */
+.bnModalHeader {
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid rgba(16, 24, 40, 0.08);
+  background: rgba(16, 24, 40, 0.02);
+}
+
+.bnModalHeaderTxt {
+  min-width: 0;
+}
+
+.bnModalTitle {
+  font-size: 16px;
+  font-weight: 950;
+  color: rgba(10, 10, 15, 0.95);
+}
+
+.bnModalSub {
+  margin-top: 6px;
+  font-size: 12px;
+  color: rgba(10, 10, 15, 0.7);
+  line-height: 1.4;
+}
+
+/* Close button (Modal.jsx uses .bnModalClose, keep .bnIconBtn too) */
+.bnModalClose {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(16, 24, 40, 0.12);
+  background: rgba(255, 255, 255, 0.95);
+  color: rgba(10, 10, 15, 0.85);
+  font-size: 20px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    transform 120ms ease,
+    border 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.bnModalClose:hover {
+  background: rgba(255, 255, 255, 1);
+  border-color: rgba(106, 0, 235, 0.25);
+  box-shadow: 0 10px 22px rgba(16, 24, 40, 0.12);
+}
+
+.bnModalClose:active {
+  transform: translateY(1px);
+}
+
+/* Backward compatible icon button */
+.bnIconBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(16, 24, 40, 0.12);
+  background: rgba(255, 255, 255, 0.95);
+  color: rgba(10, 10, 15, 0.85);
+  font-size: 18px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    transform 120ms ease,
+    border 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.bnIconBtn:hover {
+  background: rgba(255, 255, 255, 1);
+  border-color: rgba(106, 0, 235, 0.25);
+  box-shadow: 0 10px 22px rgba(16, 24, 40, 0.12);
+}
+
+.bnIconBtn:active {
+  transform: translateY(1px);
+}
+
+/* Body scroll area */
+.bnModalBody {
+  padding: 14px;
+  overflow: auto;
+  background: #ffffff;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Footer (Modal.jsx uses .bnModalFooter) */
+.bnModalFooter {
+  padding: 12px 14px;
+  border-top: 1px solid rgba(16, 24, 40, 0.08);
+  background: rgba(16, 24, 40, 0.02);
+}
+
+/* If some older markup uses these */
+.bnModalFoot {
+  padding: 12px 14px;
+  border-top: 1px solid rgba(16, 24, 40, 0.08);
+  background: rgba(16, 24, 40, 0.02);
+}
+
+/* Footer buttons row */
+.bnFormFooter {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ===================== FORM FIELDS (LIGHT) ===================== */
+.bnField {
+  display: block;
+  margin-top: 14px;
+}
+
+.bnInput,
+.bnTextarea {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(16, 24, 40, 0.12);
+  background: #ffffff;
+  color: rgba(10, 10, 15, 0.92);
+  padding: 12px 14px;
+  font-size: 14px;
+  outline: none;
+  transition:
+    border 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+  box-shadow:
+    0 1px 0 rgba(16, 24, 40, 0.04),
+    inset 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+.bnInput::placeholder,
+.bnTextarea::placeholder {
+  color: rgba(10, 10, 15, 0.38);
+}
+
+.bnTextarea {
+  resize: vertical;
+  min-height: 100px;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.bnInput:focus,
+.bnTextarea:focus {
+  border-color: rgba(106, 0, 235, 0.55);
+  box-shadow:
+    0 0 0 3px rgba(106, 0, 235, 0.16),
+    0 6px 18px rgba(16, 24, 40, 0.08);
+  transform: translateY(-1px);
+}
+
+.bnInput.err,
+.bnTextarea.err {
+  border-color: rgba(255, 59, 59, 0.45);
+  box-shadow: 0 0 0 3px rgba(255, 59, 59, 0.12);
+}
+
+/* Grid layout inside modal */
+.bnGrid2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 14px;
+}
+
+@media (max-width: 640px) {
+  .bnGrid2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===================== SWITCH (LIGHT) ===================== */
+.bnSwitchRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.bnSwitch {
+  width: 44px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid rgba(16, 24, 40, 0.12);
+  background: rgba(16, 24, 40, 0.06);
+  position: relative;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.bnSwitch.on {
+  background: rgba(106, 0, 235, 0.22);
+  border-color: rgba(106, 0, 235, 0.35);
+}
+
+.bnSwitchDot {
+  position: absolute;
+  top: 50%;
+  left: 4px;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 6px 14px rgba(16, 24, 40, 0.12);
+  transition: left 140ms ease;
+}
+
+.bnSwitch.on .bnSwitchDot {
+  left: 22px;
+}
+
+.bnSwitchTxt {
+  min-width: 0;
+}
+
+.bnSwitchLabel {
+  font-weight: 950;
+  font-size: 13px;
+  color: rgba(10, 10, 15, 0.95);
+}
+
+.bnSwitchSub {
+  margin-top: 4px;
+  opacity: 0.75;
+  font-size: 12px;
+  line-height: 1.35;
+  color: rgba(10, 10, 15, 0.72);
+}
+
+/* ===================== UPLOAD (LIGHT) ===================== */
+.bnUpload {
+  margin-top: 12px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(16, 24, 40, 0.1);
+  background: rgba(16, 24, 40, 0.02);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 10px 26px rgba(16, 24, 40, 0.06);
+}
+
+.bnUploadTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.bnExistingImage {
+  margin-bottom: 16px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(16, 24, 40, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.bnExistingImageLabel {
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.75;
+  margin-bottom: 8px;
+  color: rgba(10, 10, 15, 0.75);
+}
+
+.bnImagePreview {
+  position: relative;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(16, 24, 40, 0.04);
+  aspect-ratio: 16/9;
+  max-height: 220px;
+}
+
+/* ✅ Centering/fill is controlled by object-position + object-fit.
+   Keep this as-is unless you want full-bleed; then change contain -> cover. */
+.bnImagePreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  background: #fff;
+  display: block;
+}
+
+.bnImageOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(0, 0, 0, 0.28) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  display: flex;
+  align-items: flex-end;
+  padding: 12px;
+}
+
+.bnImagePreview:hover .bnImageOverlay {
+  opacity: 1;
+}
+
+.bnImageOverlayText {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.bnFile {
+  width: 100%;
+  padding: 12px 0;
+}
+
+.bnFile input[type="file"] {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px dashed rgba(16, 24, 40, 0.18);
+  background: rgba(255, 255, 255, 0.95);
+  color: rgba(10, 10, 15, 0.78);
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    border 160ms ease,
+    background 160ms ease;
+}
+
+.bnFile input[type="file"]:hover {
+  border-color: rgba(106, 0, 235, 0.45);
+  background: rgba(106, 0, 235, 0.04);
+}
+
+.bnFile input[type="file"]::file-selector-button {
+  padding: 8px 16px;
+  margin-right: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(106, 0, 235, 0.35);
+  background: rgba(106, 0, 235, 0.14);
+  color: rgba(10, 10, 15, 0.92);
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    border 160ms ease;
+}
+
+.bnFile input[type="file"]::file-selector-button:hover {
+  background: rgba(106, 0, 235, 0.2);
+  border-color: rgba(106, 0, 235, 0.45);
+}
+
+.bnUploadHint {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(16, 24, 40, 0.02);
+  font-size: 11px;
+  color: rgba(10, 10, 15, 0.68);
+  font-weight: 600;
+  border: 1px solid rgba(16, 24, 40, 0.08);
+  border-left: 3px solid rgba(106, 0, 235, 0.45);
+}
+
+.bnCheck {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 12px;
+  color: rgba(10, 10, 15, 0.82);
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(16, 24, 40, 0.03);
+  border: 1px solid rgba(16, 24, 40, 0.08);
+}
+
+.bnCheck input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: rgba(106, 0, 235, 0.95);
+  cursor: pointer;
+}
+
+/* ===================== PRICING (LIGHT) ===================== */
+.bnPriceBox {
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(16, 24, 40, 0.1);
+  background: rgba(16, 24, 40, 0.02);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 10px 26px rgba(16, 24, 40, 0.06);
+}
+
+.bnPriceBox.disabled {
+  opacity: 0.55;
+  pointer-events: none;
+  filter: grayscale(0.2);
+}
+
+.bnPriceTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(16, 24, 40, 0.08);
+}
+
+.bnPriceTitle {
+  font-weight: 950;
+  color: rgba(10, 10, 15, 0.92);
+  font-size: 15px;
+  letter-spacing: 0.2px;
+}
+
+.bnPriceSub {
+  margin-top: 8px;
+  font-size: 12px;
+  color: rgba(10, 10, 15, 0.7);
+  line-height: 1.4;
+}
+
+.bnPriceAuto {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(16, 24, 40, 0.08);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: inset 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+.bnPriceRow,
+.bnPricePreview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-weight: 950;
+  color: rgba(10, 10, 15, 0.9);
+  padding: 8px 0;
+}
+
+.bnPricePreview {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(16, 24, 40, 0.08);
+  font-size: 14px;
+
+  background: linear-gradient(
+    90deg,
+    rgba(106, 0, 235, 0.06) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  padding: 12px 14px;
+  border-radius: 12px;
+  margin: 12px 0 0 0;
+  border: 1px solid rgba(106, 0, 235, 0.1);
+}
+
+.bnPriceVal {
+  font-variant-numeric: tabular-nums;
+  font-size: 16px;
+  color: rgba(106, 0, 235, 0.92);
+}
+
+/* ===================== RECEIPT ===================== */
+.bnReceipt {
+  border-radius: 14px;
+  border: 1px solid rgba(16, 24, 40, 0.1);
+  background: rgba(255, 255, 255, 0.9);
+  overflow: hidden;
+}
+
+.bnReceiptRow {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(16, 24, 40, 0.08);
+}
+
+@media (max-width: 520px) {
+  .bnReceiptRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bnReceiptRow:last-child {
+  border-bottom: 0;
+}
+
+.bnReceiptK {
+  opacity: 0.8;
+  font-weight: 950;
+  font-size: 12px;
+  color: rgba(10, 10, 15, 0.7);
+}
+
+.bnReceiptV {
+  font-weight: 950;
+  font-size: 12px;
+  color: rgba(10, 10, 15, 0.88);
+  overflow-wrap: anywhere;
+}
+
+/* ===================== SMALL IMPROVEMENTS ===================== */
+@media (max-width: 520px) {
+  .bnToolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bnHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .bnHeaderRight {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  /* ✅ modal gets more usable space on small screens */
+  .bnModalOverlay {
+    padding: 10px;
+  }
+
+  .bnModalHead,
+  .bnModalBody,
+  .bnModalFoot {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .bnFormFooter {
+    justify-content: stretch;
+  }
+
+  .bnFormFooter button {
+    flex: 1;
+  }
+}
+
+/* Optional: stop background scroll when modal open (add bnNoScroll to body in JS) */
+.bnNoScroll {
+  overflow: hidden;
+}

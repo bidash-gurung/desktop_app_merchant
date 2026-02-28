@@ -10,11 +10,5 @@ body,
 body {
   overflow: hidden;
   background: #f7f7f8;
-  font-family:
-    system-ui,
-    -apple-system,
-    Segoe UI,
-    Roboto,
-    Arial,
-    sans-serif;
+  font-family: Roboto, sans-serif;
 }

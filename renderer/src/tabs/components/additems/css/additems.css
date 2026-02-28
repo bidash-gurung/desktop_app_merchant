@@ -1,0 +1,520 @@
+/* src/tabs/components/additems/css/additems.css (REPLACE with this full file) */
+
+:root {
+  --ai-line: rgba(15, 16, 32, 0.12);
+  --ai-muted: rgba(15, 16, 32, 0.62);
+  --ai-text: #0f1020;
+  --ai-primary: #6a00eb;
+
+  --ai-bg: #f7f7f8;
+  --ai-card: #ffffff;
+
+  --ai-shadow: 0 14px 30px rgba(15, 16, 32, 0.08);
+}
+
+.aiFormPro {
+  display: grid;
+  gap: 14px;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.aiProHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.aiProHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.aiProPill {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(106, 0, 235, 0.22);
+  background: rgba(106, 0, 235, 0.1);
+  color: var(--ai-primary);
+  font-weight: 950;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.aiProHeaderText {
+  min-width: 0;
+}
+
+.aiProTitle {
+  font-size: 18px;
+  font-weight: 980;
+  color: rgba(15, 16, 32, 0.92);
+  line-height: 1.1;
+}
+
+.aiProSub {
+  margin-top: 5px;
+  font-size: 12.5px;
+  color: rgba(15, 16, 32, 0.62);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 58vw;
+}
+
+.aiProPriceCard {
+  border-radius: 14px;
+  border: 1px solid rgba(15, 16, 32, 0.12);
+  background: linear-gradient(
+    180deg,
+    rgba(106, 0, 235, 0.06),
+    rgba(15, 16, 32, 0.02)
+  );
+  box-shadow: 0 10px 18px rgba(15, 16, 32, 0.06);
+  padding: 10px 12px;
+  display: grid;
+  gap: 4px;
+  min-width: 260px;
+  align-items: start;
+  text-align: right;
+}
+
+.aiProFinalLabel {
+  font-size: 11.5px;
+  font-weight: 900;
+  color: rgba(15, 16, 32, 0.62);
+  letter-spacing: 0.2px;
+}
+
+.aiProFinalValue {
+  font-size: 18px;
+  font-weight: 990;
+  color: rgba(15, 16, 32, 0.92);
+}
+
+.aiProBreakdown {
+  font-size: 12px;
+  font-weight: 850;
+  color: rgba(15, 16, 32, 0.62);
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.aiDot {
+  opacity: 0.6;
+}
+
+.aiProCard {
+  border-radius: 16px;
+  border: 1px solid rgba(15, 16, 32, 0.12);
+  background: var(--ai-card);
+  box-shadow: var(--ai-shadow);
+  padding: 14px;
+}
+
+/* alerts */
+.aiErr {
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(239, 68, 68, 0.22);
+  background: rgba(239, 68, 68, 0.08);
+  color: rgba(185, 28, 28, 0.95);
+  font-weight: 950;
+  font-size: 12.5px;
+}
+
+.aiOk {
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(34, 197, 94, 0.22);
+  background: rgba(34, 197, 94, 0.08);
+  color: rgba(21, 128, 61, 0.95);
+  font-weight: 950;
+  font-size: 12.5px;
+}
+
+/* sections */
+.aiSection {
+  padding: 12px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 16, 32, 0.09);
+  background: rgba(15, 16, 32, 0.01);
+  margin-bottom: 12px;
+}
+
+.aiSectionTitle {
+  font-size: 12px;
+  font-weight: 980;
+  color: rgba(15, 16, 32, 0.75);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  margin-bottom: 10px;
+}
+
+/* grid */
+.aiGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-width: 0;
+}
+
+.aiField {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.aiField.full {
+  grid-column: 1 / -1;
+}
+
+.aiLabel {
+  font-size: 12px;
+  font-weight: 950;
+  color: rgba(15, 16, 32, 0.78);
+}
+
+.aiReq {
+  color: rgba(239, 68, 68, 0.95);
+}
+
+.aiHint {
+  margin-top: 6px;
+  font-size: 12px;
+  color: rgba(15, 16, 32, 0.6);
+}
+.aiHintErr {
+  color: rgba(185, 28, 28, 0.95);
+  font-weight: 900;
+}
+
+/* inputs */
+.aiInput,
+.aiTextarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 16, 32, 0.12);
+  background: #fff;
+  padding: 10px 12px;
+  outline: none;
+  font-size: 12.8px;
+  color: rgba(15, 16, 32, 0.88);
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.aiTextarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+.aiInput:focus,
+.aiTextarea:focus {
+  border-color: rgba(106, 0, 235, 0.35);
+  box-shadow: 0 0 0 4px rgba(106, 0, 235, 0.08);
+}
+
+/* select */
+.aiSelectWrap {
+  position: relative;
+  width: 100%;
+}
+
+.aiSelect {
+  width: 100%;
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 16, 32, 0.12);
+  background: #fff;
+  padding: 0 42px 0 12px;
+  outline: none;
+  font-size: 12.8px;
+  color: rgba(15, 16, 32, 0.88);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.aiSelect:focus {
+  border-color: rgba(106, 0, 235, 0.35);
+  box-shadow: 0 0 0 4px rgba(106, 0, 235, 0.08);
+}
+
+.aiSelect:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.aiSelectChevron {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 12px;
+  opacity: 0.65;
+}
+
+/* toggles */
+.aiToggleRow {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding-top: 2px;
+}
+
+.aiToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 950;
+  color: rgba(15, 16, 32, 0.82);
+}
+
+.aiToggle input {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--ai-primary);
+}
+
+/* actions */
+.aiActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 6px;
+}
+
+.aiBtn {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(106, 0, 235, 0.22);
+  background: rgba(106, 0, 235, 0.1);
+  color: var(--ai-primary);
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.aiBtn.ghost {
+  background: transparent;
+  border-color: rgba(15, 16, 32, 0.14);
+  color: rgba(15, 16, 32, 0.82);
+}
+
+.aiBtn:hover {
+  filter: brightness(0.98);
+}
+
+.aiBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* category inline (dropdown + square image) */
+.aiCatInline {
+  display: grid;
+  grid-template-columns: 1fr 42px;
+  gap: 10px;
+  align-items: center;
+}
+
+.aiCatThumb {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 16, 32, 0.12);
+  background: rgba(15, 16, 32, 0.02);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aiCatThumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.aiCatThumbFallback {
+  font-weight: 950;
+  color: rgba(15, 16, 32, 0.45);
+}
+
+/* -------- ImageField styles (crisp + fitted) -------- */
+
+.aiImgWrap {
+  display: grid;
+  gap: 10px;
+}
+
+.aiImgBox {
+  border-radius: 14px;
+  border: 1px solid rgba(15, 16, 32, 0.12);
+  overflow: hidden;
+  height: 260px;
+  background:
+    linear-gradient(0deg, rgba(15, 16, 32, 0.03), rgba(15, 16, 32, 0.03)),
+    repeating-linear-gradient(
+      45deg,
+      rgba(15, 16, 32, 0.03),
+      rgba(15, 16, 32, 0.03) 10px,
+      rgba(15, 16, 32, 0.06) 10px,
+      rgba(15, 16, 32, 0.06) 20px
+    );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.aiImgBox.has {
+  background: #fff;
+}
+
+.aiImgPreview {
+  width: 100%;
+  height: 100%;
+  /* ✅ fitted + clear (no weird crop) */
+  object-fit: contain;
+  image-rendering: auto;
+  background: #fff;
+}
+
+.aiImgEmpty {
+  text-align: center;
+  color: rgba(15, 16, 32, 0.65);
+}
+
+.aiImgEmptyTitle {
+  font-weight: 980;
+  font-size: 14px;
+  color: rgba(15, 16, 32, 0.78);
+}
+
+.aiImgEmptySub {
+  margin-top: 6px;
+  font-size: 12px;
+  color: rgba(15, 16, 32, 0.6);
+}
+
+.aiImgBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.aiFileBtn {
+  position: relative;
+  overflow: hidden;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 16, 32, 0.14);
+  background: #fff;
+  color: rgba(15, 16, 32, 0.86);
+  font-weight: 950;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+
+.aiFileBtn input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.aiFileBtn.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.aiImgMeta {
+  min-width: 220px;
+  max-width: 520px;
+  display: grid;
+  gap: 2px;
+}
+
+.aiImgMeta.muted {
+  color: rgba(15, 16, 32, 0.55);
+  font-size: 12.5px;
+  font-weight: 850;
+}
+
+.aiImgName {
+  font-size: 12.5px;
+  font-weight: 900;
+  color: rgba(15, 16, 32, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.aiImgSize {
+  font-size: 12px;
+  font-weight: 850;
+  color: rgba(15, 16, 32, 0.58);
+}
+
+.aiMiniBtn {
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(239, 68, 68, 0.22);
+  background: rgba(239, 68, 68, 0.08);
+  color: rgba(185, 28, 28, 0.95);
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.aiMiniBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* responsive */
+@media (max-width: 900px) {
+  .aiProHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .aiProPriceCard {
+    width: 100%;
+    text-align: left;
+  }
+  .aiProBreakdown {
+    justify-content: flex-start;
+  }
+  .aiProSub {
+    max-width: 100%;
+    white-space: normal;
+  }
+}
+
+@media (max-width: 740px) {
+  .aiGrid {
+    grid-template-columns: 1fr;
+  }
+  .aiCatInline {
+    grid-template-columns: 1fr 42px;
+  }
+}

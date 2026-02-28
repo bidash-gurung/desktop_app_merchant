@@ -1,10 +1,8 @@
+// src/tabs/NotificationsTab.jsx
 import React from "react";
+import { NotificationsPage } from "./components/notification";
+import "./components/notification/css/notifications.css";
 
-export default function NotificationsTab() {
-  return (
-    <div style={{ padding: 18 }}>
-      <h2 style={{ marginTop: 0 }}>Notifications</h2>
-      <p style={{ opacity: 0.75 }}>Notifications will show here.</p>
-    </div>
-  );
+export default function NotificationsTab({ session }) {
+  return <NotificationsPage session={session} />;
 }

@@ -4,7 +4,6 @@ import { moneyNu, resolveScheduledItemImage } from "./ordersUtils";
 
 export default function ScheduledOrderDetailsModal({ open, job, onClose }) {
   const j = job || null;
-  if (!open || !j) return null;
 
   const p = j?.order_payload || {};
   const items = Array.isArray(p?.items) ? p.items : [];
@@ -14,11 +13,10 @@ export default function ScheduledOrderDetailsModal({ open, job, onClose }) {
   const rows = useMemo(() => {
     return items.map((it, idx) => ({
       key: `${idx}`,
-      img:
-        it?.item_image
-          ? // scheduled prefixes are handled for first image; for per-item also keep safe:
-            thumb
-          : thumb,
+      img: it?.item_image
+        ? // scheduled prefixes are handled for first image; for per-item also keep safe:
+          thumb
+        : thumb,
       name: it?.item_name || "Item",
       qty: Number(it?.quantity) || 0,
       price: moneyNu(it?.price),
@@ -26,16 +24,28 @@ export default function ScheduledOrderDetailsModal({ open, job, onClose }) {
     }));
   }, [items, thumb]);
 
+  if (!open || !j) return null;
+
   return (
     <div className="omOverlay" onMouseDown={onClose}>
-      <div className="omModal" onMouseDown={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+      <div
+        className="omModal"
+        onMouseDown={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+      >
         <div className="omHeader">
           <div className="omHeaderLeft">
             <div className="omTitle">{j?.job_id || "Scheduled"}</div>
             <span className="omPill s_SCHEDULED">Scheduled</span>
           </div>
 
-          <button type="button" className="omX" onClick={onClose} aria-label="Close">
+          <button
+            type="button"
+            className="omX"
+            onClick={onClose}
+            aria-label="Close"
+          >
             ×
           </button>
         </div>
@@ -64,7 +74,9 @@ export default function ScheduledOrderDetailsModal({ open, job, onClose }) {
               </div>
               <div className="omKV">
                 <span>Scheduled</span>
-                <b>{j?.scheduled_at_local ? String(j.scheduled_at_local) : "—"}</b>
+                <b>
+                  {j?.scheduled_at_local ? String(j.scheduled_at_local) : "—"}
+                </b>
               </div>
             </div>
 
@@ -72,7 +84,9 @@ export default function ScheduledOrderDetailsModal({ open, job, onClose }) {
               <div className="omCardTitle">Delivery</div>
               <div className="omKVBlock">
                 <b>Address</b>
-                <div className="omMuted">{p?.delivery_address?.address || "—"}</div>
+                <div className="omMuted">
+                  {p?.delivery_address?.address || "—"}
+                </div>
               </div>
             </div>
           </div>
@@ -120,13 +134,18 @@ export default function ScheduledOrderDetailsModal({ open, job, onClose }) {
                 rows.map((r) => (
                   <div key={r.key} className="omItemRow">
                     <div className="omItemThumb">
-                      {r.img ? <img src={r.img} alt="" /> : <div className="omNoImg">No image</div>}
+                      {r.img ? (
+                        <img src={r.img} alt="" />
+                      ) : (
+                        <div className="omNoImg">No image</div>
+                      )}
                     </div>
 
                     <div className="omItemMain">
                       <div className="omItemName">{r.name}</div>
                       <div className="omItemMeta">
-                        Qty: <b>{r.qty}</b> • Price: <b>{r.price}</b> • Subtotal: <b>{r.subtotal}</b>
+                        Qty: <b>{r.qty}</b> • Price: <b>{r.price}</b> •
+                        Subtotal: <b>{r.subtotal}</b>
                       </div>
                     </div>
                   </div>

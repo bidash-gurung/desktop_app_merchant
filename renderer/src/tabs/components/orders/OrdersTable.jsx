@@ -63,6 +63,11 @@ export default function OrdersTable({ mode, loading, rows, onRowClick }) {
     });
   }, [mode, rows]);
 
+  const fireRowClick = (raw) => {
+    if (typeof onRowClick === "function") onRowClick(raw);
+    else console.warn("[OrdersTable] onRowClick is not provided");
+  };
+
   if (loading && !hasRows) {
     return (
       <div className="otbEmpty">
@@ -98,11 +103,24 @@ export default function OrdersTable({ mode, loading, rows, onRowClick }) {
             <tr
               key={r._key}
               className="otbRow"
-              onClick={() => onRowClick?.(r.raw)}
+              role="button"
+              tabIndex={0}
               title="Click to view details"
+              // ✅ Capture phase makes click reliable even if something overlays
+              onMouseDownCapture={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                fireRowClick(r.raw);
+              }}
+              // ✅ Keyboard support
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  fireRowClick(r.raw);
+                }
+              }}
             >
-             
-
               <td>
                 <div className="otbOrderId">{r.orderId}</div>
                 {mode === "NORMAL" ? (
