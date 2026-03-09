@@ -1,131 +1,349 @@
 // src/tabs/components/notification/notificationApi.js
 
-function mustEnv(name) {
-  const v = import.meta.env[name];
-  if (!v) throw new Error(`Missing env: ${name}`);
-  return String(v);
+const API_TIMEOUT_MS = 20000;
+
+/* ===================== helpers ===================== */
+
+function withTimeout(factory, ms = API_TIMEOUT_MS) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), ms);
+  return Promise.resolve(factory(ctrl.signal)).finally(() => clearTimeout(t));
 }
 
-const NOTIFICATIONS_ENDPOINT = mustEnv("VITE_NOTIFICATIONS_ENDPOINT"); // .../order_notification/business/{business_id}
-const SYSTEM_NOTIFICATIONS_ENDPOINT = mustEnv(
-  "VITE_SYSTEM_NOTIFICATIONS_ENDPOINT",
-); // .../system-notifications/{user_id}
-const NOTIFICATION_READ_ENDPOINT = mustEnv("VITE_NOTIFICATION_READ_ENDPOINT"); // .../order_notification/{notificationId}/read
-const NOTIFICATION_READ_ALL_ENDPOINT = mustEnv(
-  "VITE_NOTIFICATION_READ_ALL_ENDPOINT",
-); // .../order_notification/business/{businessId}/read-all
-const NOTIFICATION_DELETE_ENDPOINT = mustEnv(
-  "VITE_NOTIFICATION_DELETE_ENDPOINT",
-); // .../order_notification/{notificationId}
-const FEEDBACK_REPLY_ENDPOINT = mustEnv("VITE_FEEDBACK_REPLY_ENDPOINT"); // .../ratings/food/{notification_id}/replies
+function pickMsg(json, fallback) {
+  if (!json) return fallback;
+  if (typeof json.message === "string" && json.message.trim())
+    return json.message;
+  if (typeof json.error === "string" && json.error.trim()) return json.error;
+  return fallback;
+}
 
-function withPath(template, params) {
-  let out = String(template);
-  Object.entries(params || {}).forEach(([k, v]) => {
-    out = out.replaceAll(`{${k}}`, encodeURIComponent(String(v)));
-  });
+function mustId(v, msg) {
+  const n = Number(v);
+  if (!Number.isFinite(n) || n <= 0) throw new Error(msg);
+  return n;
+}
+
+export function mustType(type) {
+  const t = String(type || "")
+    .toLowerCase()
+    .trim();
+  if (t === "food" || t === "mart") return t;
+  throw new Error("Invalid rating type. Expected 'food' or 'mart'.");
+}
+
+/** Replace multiple placeholder styles safely */
+function fill(url, params = {}) {
+  let out = String(url || "");
+  for (const [k, v] of Object.entries(params)) {
+    out = out
+      .replaceAll(`{${k}}`, encodeURIComponent(String(v)))
+      .replaceAll(`:${k}`, encodeURIComponent(String(v)));
+  }
   return out;
 }
 
-async function httpJSON(url, { method = "GET", token = null, body } = {}) {
-  const headers = {
-    Accept: "application/json",
-  };
-  if (body != null) headers["Content-Type"] = "application/json";
-  if (token) headers.Authorization = `Bearer ${token}`;
+async function fetchJson(url, { method = "GET", token, body } = {}) {
+  return withTimeout(async (signal) => {
+    const headers = { Accept: "application/json" };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    if (body !== undefined) headers["Content-Type"] = "application/json";
 
-  const res = await fetch(url, {
-    method,
-    headers,
-    body: body != null ? JSON.stringify(body) : undefined,
+    const res = await fetch(url, {
+      method,
+      headers,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+      signal,
+    });
+
+    let json = null;
+    try {
+      json = await res.json();
+    } catch (_) {}
+
+    if (!res.ok) {
+      throw new Error(pickMsg(json, `Request failed (${res.status})`));
+    }
+    if (json && json.success === false) {
+      throw new Error(pickMsg(json, "Request failed"));
+    }
+    return json;
   });
-
-  const text = await res.text();
-  let data = null;
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {
-    data = { success: false, message: text || "Invalid JSON response" };
-  }
-
-  if (!res.ok) {
-    const msg =
-      data?.message ||
-      data?.error ||
-      `Request failed (${res.status}) ${res.statusText}`;
-    const err = new Error(msg);
-    err.status = res.status;
-    err.data = data;
-    throw err;
-  }
-  return data;
 }
 
-/** =============== BUSINESS (ORDER) NOTIFICATIONS =============== */
+/* =========================================================
+   NOTIFICATIONS (matches your .env)
+========================================================= */
 
+const NOTIFICATIONS_ENDPOINT = import.meta.env.VITE_NOTIFICATIONS_ENDPOINT;
+const SYSTEM_NOTIFS_ENDPOINT = import.meta.env
+  .VITE_SYSTEM_NOTIFICATIONS_ENDPOINT;
+
+const NOTIF_READ_ENDPOINT = import.meta.env.VITE_NOTIFICATION_READ_ENDPOINT;
+const NOTIF_READ_ALL_ENDPOINT = import.meta.env
+  .VITE_NOTIFICATION_READ_ALL_ENDPOINT;
+const NOTIF_DELETE_ENDPOINT = import.meta.env.VITE_NOTIFICATION_DELETE_ENDPOINT;
+
+/**
+ * ✅ GET business notifications
+ */
 export async function listBusinessNotifications({
   business_id,
   token,
   unreadOnly = false,
-  limit = 100,
+  limit = 200,
   offset = 0,
-}) {
-  const url = new URL(withPath(NOTIFICATIONS_ENDPOINT, { business_id }));
-  // Backend supports: limit, offset, unreadOnly=true|false
+} = {}) {
+  if (!NOTIFICATIONS_ENDPOINT)
+    throw new Error("VITE_NOTIFICATIONS_ENDPOINT missing in .env");
+
+  const bid = mustId(business_id, "business_id missing");
+
+  const baseUrl = fill(NOTIFICATIONS_ENDPOINT, {
+    business_id: bid,
+    businessId: bid,
+  });
+
+  const url = new URL(baseUrl);
   url.searchParams.set("limit", String(limit));
   url.searchParams.set("offset", String(offset));
-  url.searchParams.set("unreadOnly", unreadOnly ? "true" : "false");
+  if (unreadOnly) url.searchParams.set("unreadOnly", "1");
 
-  const out = await httpJSON(url.toString(), { token });
-  // Expect: { success:true, count, data:[...] }
-  return out?.data || [];
+  const json = await fetchJson(url.toString(), { token });
+
+  if (Array.isArray(json)) return json;
+  if (Array.isArray(json?.data)) return json.data;
+  if (Array.isArray(json?.rows)) return json.rows;
+  return [];
 }
 
-export async function markNotificationRead({ notificationId, token }) {
-  const url = withPath(NOTIFICATION_READ_ENDPOINT, { notificationId });
-  return httpJSON(url, { method: "PATCH", token });
-}
-
-export async function markAllNotificationsRead({ businessId, token }) {
-  const url = withPath(NOTIFICATION_READ_ALL_ENDPOINT, { businessId });
-  return httpJSON(url, { method: "PATCH", token });
-}
-
-export async function deleteNotification({ notificationId, token }) {
-  const url = withPath(NOTIFICATION_DELETE_ENDPOINT, { notificationId });
-  return httpJSON(url, { method: "DELETE", token });
-}
-
-/** =============== SYSTEM NOTIFICATIONS =============== */
-
-export async function listSystemNotifications({ user_id, token }) {
-  const url = withPath(SYSTEM_NOTIFICATIONS_ENDPOINT, { user_id });
-  const out = await httpJSON(url, { token });
-  // Expect: { success:true, notifications:[...] }
-  return out?.notifications || out?.data || [];
-}
-
-/** =============== FEEDBACK REPLY =============== */
 /**
- * When you detect a feedback-type notification, allow merchant to reply.
- * Endpoint provided: .../ratings/food/{notification_id}/replies
- *
- * Payload varies by your backend; this is a safe, typical structure.
+ * ✅ GET system notifications
+ * Your backend returns: { success:true, user_id:"58", count:23, notifications:[...] }
+ */
+export async function listSystemNotifications({ user_id, token } = {}) {
+  if (!SYSTEM_NOTIFS_ENDPOINT)
+    throw new Error("VITE_SYSTEM_NOTIFICATIONS_ENDPOINT missing in .env");
+
+  const uid = mustId(user_id, "user_id missing");
+
+  const url = fill(SYSTEM_NOTIFS_ENDPOINT, { user_id: uid, userId: uid });
+
+  const json = await fetchJson(url, { token });
+
+  // ✅ FIX: support your backend response shape
+  if (Array.isArray(json)) return json;
+  if (Array.isArray(json?.notifications)) return json.notifications;
+  if (Array.isArray(json?.data)) return json.data;
+  if (Array.isArray(json?.rows)) return json.rows;
+  return [];
+}
+
+/**
+ * ✅ POST mark one read
+ */
+export async function markNotificationRead({ notificationId, token } = {}) {
+  if (!NOTIF_READ_ENDPOINT)
+    throw new Error("VITE_NOTIFICATION_READ_ENDPOINT missing in .env");
+
+  const id = mustId(notificationId, "notificationId missing");
+
+  const url = fill(NOTIF_READ_ENDPOINT, {
+    notificationId: id,
+    notification_id: id,
+  });
+
+  return fetchJson(url, { method: "POST", token });
+}
+
+/**
+ * ✅ POST mark all read
+ */
+export async function markAllNotificationsRead({ businessId, token } = {}) {
+  if (!NOTIF_READ_ALL_ENDPOINT)
+    throw new Error("VITE_NOTIFICATION_READ_ALL_ENDPOINT missing in .env");
+
+  const bid = mustId(businessId, "businessId missing");
+
+  const url = fill(NOTIF_READ_ALL_ENDPOINT, {
+    businessId: bid,
+    business_id: bid,
+  });
+
+  return fetchJson(url, { method: "POST", token });
+}
+
+/**
+ * ✅ DELETE notification
+ */
+export async function deleteNotification({ notificationId, token } = {}) {
+  if (!NOTIF_DELETE_ENDPOINT)
+    throw new Error("VITE_NOTIFICATION_DELETE_ENDPOINT missing in .env");
+
+  const id = mustId(notificationId, "notificationId missing");
+
+  const url = fill(NOTIF_DELETE_ENDPOINT, {
+    notificationId: id,
+    notification_id: id,
+  });
+
+  return fetchJson(url, { method: "DELETE", token });
+}
+
+/* =========================================================
+   FEEDBACK / RATINGS (matches your .env)
+========================================================= */
+
+const FEEDBACK_ENDPOINT = import.meta.env.VITE_FEEDBACK_ENDPOINT;
+const FEEDBACK_REPLY_ENDPOINT = import.meta.env.VITE_FEEDBACK_REPLY_ENDPOINT;
+const FEEDBACK_REPLY_DELETE_ENDPOINT = import.meta.env
+  .VITE_FEEDBACK_REPLY_DELETE_ENDPOINT;
+
+const FEEDBACK_REPORT_ENDPOINT = import.meta.env.VITE_FEEDBACK_REPORT_ENDPOINT;
+const FEEDBACK_REPLY_REPORT_ENDPOINT = import.meta.env
+  .VITE_FEEDBACK_REPLY_REPORT_ENDPOINT;
+
+const FEEDBACK_LIKE_ENDPOINT = import.meta.env.VITE_FEEDBACK_LIKE_ENDPOINT;
+const FEEDBACK_UNLIKE_ENDPOINT = import.meta.env.VITE_FEEDBACK_UNLIKE_ENDPOINT;
+
+/**
+ * ✅ NotificationsPage expects: { rows, meta }
+ */
+export async function listFeedbacksWithMeta({
+  business_id,
+  token,
+  page = 1,
+  limit = 50,
+} = {}) {
+  if (!FEEDBACK_ENDPOINT)
+    throw new Error("VITE_FEEDBACK_ENDPOINT missing in .env");
+
+  const bid = mustId(business_id, "business_id missing");
+
+  const urlStr = fill(FEEDBACK_ENDPOINT, { business_id: bid, businessId: bid });
+  const url = new URL(urlStr);
+  url.searchParams.set("page", String(page));
+  url.searchParams.set("limit", String(limit));
+
+  const json = await fetchJson(url.toString(), { token });
+
+  return {
+    rows: Array.isArray(json?.data) ? json.data : [],
+    meta: json?.meta || null,
+  };
+}
+
+/**
+ * ✅ POST reply
  */
 export async function sendFeedbackReply({
-  notification_id,
-  user_id,
+  rating_id,
+  owner_type,
   token,
-  reply,
-}) {
-  const url = withPath(FEEDBACK_REPLY_ENDPOINT, { notification_id });
+  text,
+} = {}) {
+  if (!FEEDBACK_REPLY_ENDPOINT)
+    throw new Error("VITE_FEEDBACK_REPLY_ENDPOINT missing in .env");
 
-  const body = {
-    user_id: Number(user_id),
-    reply: String(reply || "").trim(),
-  };
+  const rid = mustId(rating_id, "rating_id missing");
+  const type = mustType(owner_type);
 
-  if (!body.reply) throw new Error("Reply cannot be empty.");
+  const msg = String(text || "").trim();
+  if (!msg) throw new Error("Reply text is required");
 
-  return httpJSON(url, { method: "POST", token, body });
+  const url = fill(FEEDBACK_REPLY_ENDPOINT, {
+    type,
+    rating_id: rid,
+    ratingId: rid,
+  });
+
+  return fetchJson(url, { method: "POST", token, body: { text: msg } });
+}
+
+/**
+ * ✅ DELETE reply
+ */
+export async function deleteFeedbackReply({
+  reply_id,
+  owner_type,
+  token,
+} = {}) {
+  if (!FEEDBACK_REPLY_DELETE_ENDPOINT)
+    throw new Error("VITE_FEEDBACK_REPLY_DELETE_ENDPOINT missing in .env");
+
+  const repId = mustId(reply_id, "reply_id missing");
+  const type = mustType(owner_type);
+
+  const url = fill(FEEDBACK_REPLY_DELETE_ENDPOINT, {
+    type,
+    reply_id: repId,
+    replyId: repId,
+  });
+
+  return fetchJson(url, { method: "DELETE", token });
+}
+
+/**
+ * ✅ REPORT feedback
+ */
+export async function reportFeedback({ type, rating_id, reason, token } = {}) {
+  if (!FEEDBACK_REPORT_ENDPOINT)
+    throw new Error("VITE_FEEDBACK_REPORT_ENDPOINT missing in .env");
+
+  const t = mustType(type);
+  const rid = mustId(rating_id, "rating_id missing");
+  const r = String(reason || "").trim();
+  if (!r) throw new Error("reason is required");
+
+  const url = fill(FEEDBACK_REPORT_ENDPOINT, { type: t, rating_id: rid });
+  return fetchJson(url, { method: "POST", token, body: { reason: r } });
+}
+
+/**
+ * ✅ REPORT reply
+ */
+export async function reportFeedbackReply({
+  type,
+  reply_id,
+  reason,
+  token,
+} = {}) {
+  if (!FEEDBACK_REPLY_REPORT_ENDPOINT)
+    throw new Error("VITE_FEEDBACK_REPLY_REPORT_ENDPOINT missing in .env");
+
+  const t = mustType(type);
+  const repId = mustId(reply_id, "reply_id missing");
+  const r = String(reason || "").trim();
+  if (!r) throw new Error("reason is required");
+
+  const url = fill(FEEDBACK_REPLY_REPORT_ENDPOINT, {
+    type: t,
+    reply_id: repId,
+  });
+  return fetchJson(url, { method: "POST", token, body: { reason: r } });
+}
+
+/**
+ * ✅ LIKE / UNLIKE
+ */
+export async function likeRating({ type, rating_id, token } = {}) {
+  if (!FEEDBACK_LIKE_ENDPOINT)
+    throw new Error("VITE_FEEDBACK_LIKE_ENDPOINT missing in .env");
+
+  const t = mustType(type);
+  const rid = mustId(rating_id, "rating_id missing");
+
+  const url = fill(FEEDBACK_LIKE_ENDPOINT, { type: t, rating_id: rid });
+  return fetchJson(url, { method: "POST", token });
+}
+
+export async function unlikeRating({ type, rating_id, token } = {}) {
+  if (!FEEDBACK_UNLIKE_ENDPOINT)
+    throw new Error("VITE_FEEDBACK_UNLIKE_ENDPOINT missing in .env");
+
+  const t = mustType(type);
+  const rid = mustId(rating_id, "rating_id missing");
+
+  const url = fill(FEEDBACK_UNLIKE_ENDPOINT, { type: t, rating_id: rid });
+  return fetchJson(url, { method: "POST", token });
 }

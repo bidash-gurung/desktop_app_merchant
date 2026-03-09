@@ -5,18 +5,13 @@ import { fmtDateTime, safeText } from "./utils";
 export default function NotificationDrawer({ open, item, onClose }) {
   useEffect(() => {
     if (!open) return;
-
-    const onKey = (e) => {
-      if (e.key === "Escape") onClose?.();
-    };
-
+    const onKey = (e) => e.key === "Escape" && onClose?.();
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
   useEffect(() => {
     if (!open) return;
-    // lock body scroll (panel still scrolls, but prevents weird page shifts)
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
@@ -32,14 +27,11 @@ export default function NotificationDrawer({ open, item, onClose }) {
     item?.created_at || item?.sent_at || item?.createdAt,
   );
   const type = safeText(item?.type, item?.order_id ? "order" : "system");
-  const orderId = safeText(item?.order_id, "");
 
   return (
     <div className="ntDrawerOverlay" role="dialog" aria-modal="true">
-      {/* backdrop */}
       <div className="ntDrawerBackdrop" onMouseDown={onClose} />
 
-      {/* panel */}
       <div className="ntDrawerPanel" onMouseDown={(e) => e.stopPropagation()}>
         <div className="ntDrawerHeader">
           <div className="ntDrawerHeaderText">
@@ -69,15 +61,14 @@ export default function NotificationDrawer({ open, item, onClose }) {
             <div className="ntV">{created}</div>
           </div>
 
-          {orderId ? (
+          {item?.order_id ? (
             <div className="ntKV">
               <div className="ntK">Order ID</div>
-              <div className="ntV">{orderId}</div>
+              <div className="ntV">{safeText(item.order_id)}</div>
             </div>
           ) : null}
 
           <div className="ntDivider" />
-
           <div className="ntLongText">{message}</div>
         </div>
       </div>

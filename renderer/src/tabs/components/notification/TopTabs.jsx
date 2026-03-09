@@ -1,26 +1,24 @@
 // src/tabs/components/notification/TopTabs.jsx
 import React from "react";
 
-export default function TopTabs({ tabs, activeKey, onChange }) {
+export default function TopTabs({ tabs = [], activeKey, onChange }) {
   return (
     <div className="ntTopTabs" role="tablist" aria-label="Notification tabs">
       {tabs.map((t) => {
-        const active = t.key === activeKey;
+        const isActive = t.key === activeKey;
         return (
           <button
             key={t.key}
             type="button"
-            className={`ntTabBtn ${active ? "isActive" : ""}`}
-            onClick={() => onChange(t.key)}
             role="tab"
-            aria-selected={active ? "true" : "false"}
+            aria-selected={isActive}
+            className={`ntTabBtn ${isActive ? "isActive" : ""}`}
+            onClick={() => onChange?.(t.key)}
           >
             <span className="ntTabLabel">{t.label}</span>
-            {typeof t.count === "number" && (
-              <span className={`ntTabCount ${active ? "isActive" : ""}`}>
-                {t.count}
-              </span>
-            )}
+            <span className={`ntTabCount ${isActive ? "isActive" : ""}`}>
+              {Number(t.count || 0)}
+            </span>
           </button>
         );
       })}

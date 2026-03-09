@@ -1,0 +1,1048 @@
+/* src/tabs/components/wallets/css/wallet.css */
+
+.wlPage {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.wlContainer {
+  width: 100%;
+  max-width: 1200px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Header */
+.wlHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.wlTitle {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 950;
+  letter-spacing: 0.2px;
+}
+
+.wlSub {
+  margin-top: 6px;
+  opacity: 0.75;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.wlHeaderRight {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Alerts */
+.wlAlert {
+  border: 1px solid rgba(10, 10, 15, 0.1);
+  background: rgba(246, 247, 251, 0.96);
+  border-radius: 16px;
+  padding: 12px 14px;
+}
+
+.wlAlertErr {
+  border-color: rgba(220, 38, 38, 0.25);
+  background: rgba(254, 242, 242, 0.8);
+}
+
+.wlAlertTitle {
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+
+.wlAlertText {
+  opacity: 0.9;
+  font-size: 13px;
+}
+
+/* Skeleton */
+.wlSkeleton {
+  border: 1px solid rgba(10, 10, 15, 0.08);
+  border-radius: 16px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.wlSkRow {
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(10, 10, 15, 0.08);
+  margin: 10px 0;
+}
+
+/* Empty */
+.wlEmpty {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.wlEmptyCard {
+  width: 100%;
+  max-width: 620px;
+  border: 1px solid rgba(10, 10, 15, 0.1);
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.wlEmptyTitle {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.wlEmptyText {
+  margin-top: 6px;
+  font-size: 13px;
+  opacity: 0.8;
+  line-height: 1.45;
+}
+
+.wlRow {
+  display: flex;
+  align-items: center;
+}
+
+.wlRowGap {
+  margin-top: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Grid */
+.wlGrid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 980px) {
+  .wlGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.wlCard {
+  border: 1px solid rgba(10, 10, 15, 0.1);
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: 0 10px 24px rgba(12, 14, 20, 0.06);
+  backdrop-filter: blur(8px);
+}
+
+.wlCardWide {
+  grid-column: 1 / -1;
+}
+
+.wlCardTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.wlCardTitle {
+  font-size: 15px;
+  font-weight: 950;
+  margin: 0;
+}
+
+.wlCardSub {
+  margin-top: 4px;
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.wlMono {
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+}
+
+/* Pills */
+.wlPill {
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 900;
+  border: 1px solid rgba(10, 10, 15, 0.1);
+  background: rgba(246, 247, 251, 0.9);
+}
+
+.wlPill.ok {
+  border-color: rgba(22, 163, 74, 0.25);
+  background: rgba(220, 252, 231, 0.65);
+}
+
+.wlPill.warn {
+  border-color: rgba(245, 158, 11, 0.25);
+  background: rgba(255, 237, 213, 0.65);
+}
+
+.wlPill.muted {
+  opacity: 0.8;
+}
+
+.wlNote {
+  font-size: 12px;
+  opacity: 0.75;
+  margin-top: 4px;
+}
+
+/* Balance */
+.wlBalance {
+  margin-top: 8px;
+  border-radius: 16px;
+  border: 1px dashed rgba(10, 10, 15, 0.14);
+  padding: 12px;
+  background: rgba(246, 247, 251, 0.75);
+}
+
+.wlBalanceLabel {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.wlBalanceValue {
+  margin-top: 6px;
+  font-size: 28px;
+  font-weight: 950;
+  letter-spacing: 0.2px;
+}
+
+/* Form */
+.wlForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.wlField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wlLabel {
+  font-size: 12px;
+  font-weight: 800;
+  opacity: 0.85;
+}
+.wlLinkBtn {
+  font-size: 12px;
+  font-weight: 900;
+  color: rgba(106, 0, 235, 0.92);
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+.wlInput {
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(10, 10, 15, 0.12);
+  background: rgba(255, 255, 255, 0.85);
+  padding: 0 12px;
+  outline: none;
+  font-size: 13px;
+}
+
+.wlInput:focus {
+  border-color: rgba(106, 0, 235, 0.35);
+  box-shadow: 0 0 0 4px rgba(106, 0, 235, 0.1);
+}
+
+.wlInputRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.wlHelp {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.wlHelpOk {
+  font-size: 12px;
+  color: rgba(22, 163, 74, 1);
+  opacity: 0.95;
+}
+
+.wlHint {
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: 0.7;
+  line-height: 1.4;
+}
+
+/* Buttons */
+.wlBtn {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(10, 10, 15, 0.12);
+  background: rgba(255, 255, 255, 0.85);
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.12s ease,
+    opacity 0.12s ease;
+}
+
+.wlBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.wlBtn:active {
+  transform: translateY(1px);
+}
+
+.wlBtnFull {
+  width: 100%;
+}
+
+.wlBtnPrimary {
+  border-color: rgba(106, 0, 235, 0.28);
+  background: rgba(106, 0, 235, 0.92);
+  color: white;
+  box-shadow: 0 10px 22px rgba(106, 0, 235, 0.2);
+}
+
+.wlBtnSecondary {
+  background: rgba(246, 247, 251, 0.95);
+}
+
+.wlBtnGhost {
+  background: transparent;
+}
+
+/* Segmented */
+.wlSeg {
+  display: inline-flex;
+  border: 1px solid rgba(10, 10, 15, 0.1);
+  background: rgba(246, 247, 251, 0.85);
+  border-radius: 999px;
+  padding: 3px;
+  gap: 4px;
+}
+
+.wlSegBtn {
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+  font-weight: 900;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0.75;
+}
+
+.wlSegBtn.active {
+  background: rgba(255, 255, 255, 0.95);
+  opacity: 1;
+  box-shadow: 0 8px 18px rgba(12, 14, 20, 0.08);
+}
+
+/* Toggle */
+.wlToggle {
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(10, 10, 15, 0.12);
+  background: rgba(246, 247, 251, 0.95);
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.wlToggle .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 1);
+}
+
+.wlToggle.on .dot {
+  background: rgba(22, 163, 74, 1);
+}
+
+/* Inline messages */
+.wlInlineErr,
+.wlInlineOk {
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 13px;
+  border: 1px solid rgba(10, 10, 15, 0.1);
+  background: rgba(246, 247, 251, 0.85);
+  margin-bottom: 10px;
+}
+
+.wlInlineErr {
+  border-color: rgba(220, 38, 38, 0.25);
+  background: rgba(254, 242, 242, 0.85);
+}
+
+.wlInlineOk {
+  border-color: rgba(22, 163, 74, 0.25);
+  background: rgba(220, 252, 231, 0.65);
+}
+
+/* Table */
+.wlTableWrap {
+  margin-top: 10px;
+  overflow: auto;
+  border-radius: 14px;
+  border: 1px solid rgba(10, 10, 15, 0.1);
+}
+
+.wlTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 860px;
+}
+
+.wlTable thead th {
+  text-align: left;
+  padding: 10px 12px;
+  background: rgba(246, 247, 251, 0.95);
+  border-bottom: 1px solid rgba(10, 10, 15, 0.08);
+  font-size: 12px;
+  letter-spacing: 0.2px;
+  opacity: 0.8;
+}
+
+.wlTable td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(10, 10, 15, 0.06);
+  vertical-align: top;
+}
+
+.wlTable tr:hover td {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.right {
+  text-align: right;
+}
+
+.wlEmptyMini {
+  padding: 12px;
+  opacity: 0.75;
+}
+
+/* ===== Account row ===== */
+.wlAccountRow {
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.wlAccountBlock {
+  flex: 1;
+  min-width: 320px;
+}
+
+.wlAccountLabel {
+  font-size: 12px;
+  font-weight: 800;
+  opacity: 0.75;
+}
+
+.wlAccountValueRow {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.wlAccountValue {
+  font-size: 18px;
+  font-weight: 950;
+  letter-spacing: 0.3px;
+}
+
+.wlIconBtn {
+  height: 36px;
+  width: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(10, 10, 15, 0.12);
+  background: rgba(246, 247, 251, 0.92);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.12s ease,
+    opacity 0.12s ease;
+}
+
+.wlIconBtn:active {
+  transform: translateY(1px);
+}
+
+.wlCopied {
+  font-size: 12px;
+  font-weight: 900;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(22, 163, 74, 0.25);
+  background: rgba(220, 252, 231, 0.65);
+}
+
+/* ===== Balance mini ===== */
+.wlBalanceMini {
+  min-width: 260px;
+  border-radius: 16px;
+  border: 1px dashed rgba(10, 10, 15, 0.14);
+  padding: 12px;
+  background: rgba(246, 247, 251, 0.75);
+}
+
+.wlBalanceValueSm {
+  margin-top: 6px;
+  font-size: 22px;
+  font-weight: 950;
+}
+
+/* Actions row */
+.wlActionsRow {
+  margin-top: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ===== Modal ===== */
+.wlModalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(10, 10, 15, 0.42);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.wlModal {
+  width: 100%;
+  max-width: 680px;
+  border-radius: 18px;
+  border: 1px solid rgba(10, 10, 15, 0.12);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 26px 70px rgba(12, 14, 20, 0.22);
+  padding: 14px;
+  backdrop-filter: blur(10px);
+}
+
+.wlModalTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.wlModalTitle {
+  font-size: 16px;
+  font-weight: 950;
+}
+
+.wlModalSub {
+  margin-top: 4px;
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.wlModalActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.wlSummary {
+  border-radius: 16px;
+  border: 1px solid rgba(10, 10, 15, 0.1);
+  background: rgba(246, 247, 251, 0.85);
+  padding: 12px;
+}
+
+.wlSummaryRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  padding: 6px 0;
+}
+
+.wlSummaryNote {
+  max-width: 360px;
+  text-align: right;
+  opacity: 0.9;
+  word-break: break-word;
+}
+
+/* =========================================================
+   ✅ ADDITIVE ENHANCEMENTS ONLY (no breaking changes)
+   - Makes transaction table closer to screenshot
+   - Ensures From/To/Remark have space + wrap nicely
+   - Adds optional pills for CR/DR if used
+========================================================= */
+
+/* Make table area look cleaner */
+.wlTableWrap {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+/* Keep header labels single-line */
+.wlTable thead th {
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
+/* Wider table so columns don't collapse */
+.wlTable {
+  min-width: 1100px;
+}
+
+/* Safer wrapping for long IDs */
+.wlTable td {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Optional: column helper classes (safe if not used) */
+.wlColTxn {
+  width: 270px;
+}
+.wlColJrn {
+  width: 170px;
+}
+.wlColFrom,
+.wlColTo {
+  width: 150px;
+}
+.wlColDir {
+  width: 70px;
+}
+.wlColAmt {
+  width: 120px;
+}
+.wlColDate {
+  width: 170px;
+}
+.wlColRemark {
+  width: 340px;
+}
+
+/* Optional: direction pill (safe if not used) */
+.wlDirPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  min-width: 44px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 950;
+  border: 1px solid rgba(10, 10, 15, 0.12);
+  background: rgba(246, 247, 251, 0.9);
+}
+
+.wlDirPill.cr {
+  border-color: rgba(22, 163, 74, 0.25);
+  background: rgba(220, 252, 231, 0.7);
+}
+
+.wlDirPill.dr {
+  border-color: rgba(220, 38, 38, 0.25);
+  background: rgba(254, 226, 226, 0.7);
+}
+
+/* Optional: remark formatting (safe if not used) */
+.wlRemarkCell {
+  min-width: 280px;
+}
+
+.wlRemarkText {
+  line-height: 1.35;
+  opacity: 0.9;
+}
+
+/* Optional: date filter + actions (safe if not used) */
+.wlActionsInline {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.wlDateRow {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.wlDateField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wlDateLabel {
+  font-size: 12px;
+  font-weight: 900;
+  opacity: 0.75;
+}
+
+.wlInputDate {
+  min-width: 150px;
+}
+
+.wlCountRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2px;
+  margin-bottom: 6px;
+}
+
+.wlCountText {
+  font-size: 12px;
+  opacity: 0.75;
+  font-weight: 800;
+}
+
+.wlFooterHint {
+  margin-top: 10px;
+  font-size: 12px;
+  opacity: 0.75;
+}
+/* =========================================================
+   ForgotTpinModal.jsx styles ONLY
+   (Add this at the bottom of your wallet.css)
+========================================================= */
+
+/* Tabs (Email / SMS) */
+.wlTabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px;
+  border-radius: 12px;
+  border: 1px solid rgba(10, 10, 15, 0.14);
+  background: rgba(246, 247, 251, 0.9);
+  margin: 6px 0 10px;
+}
+
+.wlTab {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 0;
+  background: transparent;
+  font-weight: 950;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0.78;
+  transition:
+    opacity 0.12s ease,
+    transform 0.08s ease,
+    box-shadow 0.12s ease;
+}
+
+.wlTab:active {
+  transform: translateY(1px);
+}
+
+.wlTab:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.wlTab.active {
+  background: rgba(255, 255, 255, 0.96);
+  opacity: 1;
+  box-shadow: 0 10px 18px rgba(12, 14, 20, 0.08);
+  border: 1px solid rgba(10, 10, 15, 0.06);
+}
+
+/* Modal actions layouts */
+.wlModalActionsBetween {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.wlModalActionsRight {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+/* Make the top close button look like the screenshot (only inside modal top) */
+.wlModalTop .wlIconBtn {
+  height: 42px;
+  width: 46px;
+  border-radius: 14px;
+  border: 1px solid rgba(10, 10, 15, 0.12);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 12px 26px rgba(12, 14, 20, 0.08);
+}
+
+.wlModalTop .wlIconBtn:hover {
+  box-shadow: 0 16px 34px rgba(12, 14, 20, 0.12);
+}
+
+.wlModalTop .wlIconBtn:active {
+  transform: translateY(1px);
+}
+
+/* Modal title sizing to match screenshot */
+.wlModal .wlModalTitle {
+  font-size: 22px;
+  font-weight: 950;
+  letter-spacing: 0.2px;
+}
+
+.wlModal .wlModalSub {
+  font-size: 14px;
+  opacity: 0.82;
+  margin-top: 6px;
+}
+
+/* Improve spacing inside this modal */
+.wlModal .wlForm {
+  gap: 12px;
+}
+
+.wlModal .wlHelp {
+  font-size: 13px;
+  opacity: 0.78;
+}
+
+/* Buttons inside modal: slightly bigger + consistent */
+.wlModal .wlBtn {
+  height: 44px;
+  border-radius: 14px;
+  padding: 0 14px;
+}
+
+/* Primary button emphasis */
+.wlModal .wlBtnPrimary {
+  box-shadow: 0 12px 26px rgba(106, 0, 235, 0.24);
+}
+
+/* Secondary button a bit more visible in modal */
+.wlModal .wlBtnSecondary {
+  border-color: rgba(10, 10, 15, 0.12);
+  background: rgba(246, 247, 251, 0.96);
+}
+
+/* Ghost button cleaner */
+.wlModal .wlBtnGhost {
+  background: transparent;
+  border-color: rgba(10, 10, 15, 0.12);
+}
+
+/* Inputs in modal */
+.wlModal .wlInput {
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* Keep the "Done" button full width but not too tall */
+.wlModal .wlBtnFull {
+  height: 46px;
+}
+
+.wlLinksRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.wlLinkBtn {
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(10, 10, 15, 0.18);
+  background: rgba(255, 255, 255, 0.85);
+  font-weight: 900;
+  cursor: pointer;
+}
+.wlLinkBtn:active {
+  transform: translateY(1px);
+}
+/* ================================
+   ADD THESE (not present in your CSS)
+   Used by the new "Show QR" button + QR modal UI
+   Paste at the BOTTOM of wallet.css
+================================ */
+
+/* Minimal right-side layout: Show QR button + Balance */
+.wlAccountRowMinimal {
+  align-items: flex-start;
+}
+
+.wlAccountRight {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.wlQrOpenBtn {
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-weight: 950;
+}
+
+/* Make balance card cleaner (not dashed) when using wlBalanceMiniMinimal class */
+.wlBalanceMiniMinimal {
+  border: 1px solid rgba(10, 10, 15, 0.1) !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Actions row: keep hint inline */
+.wlActionsRowMinimal {
+  gap: 12px;
+  align-items: center;
+}
+
+.wlHintInline {
+  margin-top: 0 !important;
+  opacity: 0.68;
+}
+
+/* ===== QR Modal (minimal) ===== */
+.wlQrModal {
+  max-width: 520px;
+  padding: 16px;
+}
+
+.wlQrModalTop {
+  margin-bottom: 12px;
+}
+
+.wlQrModalTopRight {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.wlQrModalBody {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.wlQrModalQr {
+  border-radius: 16px;
+  border: 1px solid rgba(10, 10, 15, 0.1);
+  background: rgba(246, 247, 251, 0.6);
+  height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wlQrModalImg {
+  width: 250px;
+  height: 250px;
+  image-rendering: pixelated;
+}
+
+.wlQrModalMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Disclaimer block inside modal */
+.wlQrDisclaimerMinimal {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(10, 10, 15, 0.08);
+  font-size: 12px;
+  line-height: 1.45;
+  opacity: 0.7;
+}
+
+/* Modal footer actions */
+.wlQrModalActions {
+  margin-top: 12px;
+}
+
+/* Responsive */
+@media (max-width: 980px) {
+  .wlAccountRight {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .wlQrOpenBtn {
+    width: 100%;
+  }
+
+  .wlBalanceMiniMinimal {
+    width: 100%;
+  }
+}
+
+/* Responsive: stack QR + balance nicely */
+@media (max-width: 980px) {
+  .wlRightCol {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .wlQrMini {
+    width: 100%;
+  }
+
+  .wlBalanceMini {
+    width: 100%;
+    min-width: 0;
+  }
+}

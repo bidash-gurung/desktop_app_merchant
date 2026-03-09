@@ -1,65 +1,82 @@
 // src/tabs/components/notification/ReplyModal.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import { safeText } from "./utils";
+import { pickFeedbackId } from "./utils.js";
 
 export default function ReplyModal({ open, item, busy, onClose, onSubmit }) {
   const [text, setText] = useState("");
+  const [err, setErr] = useState("");
 
-  const header = useMemo(() => {
-    if (!item) return "";
-    return safeText(item?.title || "Reply");
-  }, [item]);
+  const feedbackId = useMemo(() => pickFeedbackId(item), [item]);
+  const count = useMemo(() => String(text || "").trim().length, [text]);
 
   useEffect(() => {
-    if (open) setText("");
-  }, [open]);
+    if (!open) return;
+    setText("");
+    setErr("");
+
+    const onKey = (e) => {
+      if (e.key === "Escape") onClose?.();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
 
   if (!open) return null;
 
+  const submit = async () => {
+    if (!feedbackId) {
+      setErr("Feedback id not found.");
+      return;
+    }
+    const msg = String(text || "").trim();
+    if (!msg) {
+      setErr("Reply message is empty.");
+      return;
+    }
+    if (msg.length > 1000) {
+      setErr("Reply is too long (max 1000 chars).");
+      return;
+    }
+    setErr("");
+    await onSubmit?.(msg);
+  };
+
   return (
-    <div className="ntModalBackdrop" onMouseDown={onClose}>
-      <div
-        className="ntModal"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Reply"
-        onMouseDown={(e) => e.stopPropagation()}
-      >
+    <div className="ntModalOverlay" role="dialog" aria-modal="true">
+      <div className="ntModalBackdrop" onMouseDown={onClose} />
+      <div className="ntModal" onMouseDown={(e) => e.stopPropagation()}>
         <div className="ntModalHeader">
           <div>
-            <div className="ntModalTitle">{header}</div>
+            <div className="ntModalTitle">Reply</div>
             <div className="ntModalSub">
-              Reply will be posted to the feedback thread.
+              Replying to feedback #{feedbackId || "—"}
             </div>
           </div>
 
-          <button
-            type="button"
-            className="ntIconBtn"
-            onClick={onClose}
-            disabled={!!busy}
-            aria-label="Close"
-            title="Close"
-          >
-            ✕
+          <button className="ntIconBtn" onClick={onClose} aria-label="Close">
+            ×
           </button>
         </div>
 
         <div className="ntModalBody">
-          <div className="ntField">
-            <label className="ntLabel">Your reply</label>
-            <textarea
-              className="ntTextarea"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="Type your reply..."
-              rows={6}
-              disabled={!!busy}
-            />
+          <textarea
+            className={`ntTextarea ${err ? "isInvalid" : ""}`}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Write your reply…"
+            rows={5}
+            disabled={!!busy}
+          />
+
+          <div className="ntHelpRow">
+            <div className={`ntHelpText ${err ? "isErr" : ""}`}>
+              {err || "Max 1000 characters."}
+            </div>
+            <div className="ntHelpCount">{count}/1000</div>
           </div>
         </div>
 
-        <div className="ntModalFooter">
+        <div className="ntModalActions">
           <button
             type="button"
             className="ntBtn ntBtnSoft"
@@ -71,10 +88,10 @@ export default function ReplyModal({ open, item, busy, onClose, onSubmit }) {
           <button
             type="button"
             className="ntBtn ntBtnPrimary"
-            onClick={() => onSubmit?.(text)}
-            disabled={!!busy || !String(text).trim()}
+            onClick={submit}
+            disabled={!!busy}
           >
-            Send reply
+            Send Reply
           </button>
         </div>
       </div>

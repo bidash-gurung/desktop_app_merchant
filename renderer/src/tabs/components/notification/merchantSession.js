@@ -8,36 +8,75 @@ function tryParseJSON(v) {
   }
 }
 
+function asNumber(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+function pickOwnerType(payload) {
+  const user = payload?.user || payload?.data?.user || null;
+
+  const owner =
+    user?.owner_type ??
+    payload?.owner_type ??
+    payload?.data?.owner_type ??
+    user?.ownerType ??
+    payload?.ownerType ??
+    payload?.data?.ownerType ??
+    null;
+
+  return owner ? String(owner).trim().toLowerCase() : "";
+}
+
+/**
+ * Extract user_id, business_id, token, owner_type from the session prop.
+ */
 export function pickSessionIds(session) {
   const payload = session?.payload || session || {};
   const user = payload?.user || payload?.data?.user || null;
 
-  const user_id = user?.user_id ?? user?.id ?? null;
+  const user_id = asNumber(
+    user?.user_id ?? user?.id ?? payload?.user_id ?? null,
+  );
 
   const token =
     payload?.token?.access_token ||
     payload?.data?.token?.access_token ||
     payload?.access_token ||
     payload?.data?.access_token ||
+    payload?.token ||
     null;
 
-  const business_id =
+  // ✅ MUCH STRONGER business_id extraction
+  const business_id = asNumber(
     user?.business_id ??
-    payload?.business_id ??
-    payload?.data?.business_id ??
-    user?.businessId ??
-    null;
+      payload?.business_id ??
+      payload?.data?.business_id ??
+      user?.businessId ??
+      payload?.businessId ??
+      payload?.data?.businessId ??
+      payload?.business?.business_id ??
+      payload?.business?.businessId ??
+      user?.business?.business_id ??
+      user?.business?.businessId ??
+      payload?.data?.business?.business_id ??
+      payload?.data?.business?.businessId ??
+      null,
+  );
+
+  const owner_type = pickOwnerType(payload);
 
   return {
-    user_id: user_id != null ? Number(user_id) : null,
-    business_id: business_id != null ? Number(business_id) : null,
+    user_id,
+    business_id,
     token: token ? String(token) : null,
+    owner_type,
     raw: payload,
   };
 }
 
 /**
- * Fallback reader if session prop is not passed.
+ * Fallback: if session prop is missing, try from storage.
  */
 export function getMerchantSessionFromStorage() {
   const keys = [
@@ -49,7 +88,6 @@ export function getMerchantSessionFromStorage() {
     "user",
     "merchant",
   ];
-
   const storages = [localStorage, sessionStorage];
 
   for (const st of storages) {
@@ -62,45 +100,14 @@ export function getMerchantSessionFromStorage() {
 
       const picked = pickSessionIds(data);
       if (picked.user_id && picked.business_id) return picked;
-
-      // alternate shapes
-      const userId =
-        data.user_id ??
-        data.userId ??
-        data?.user?.user_id ??
-        data?.user?.userId ??
-        data?.merchant?.user_id ??
-        data?.merchant?.userId ??
-        data?.profile?.user_id ??
-        data?.profile?.userId;
-
-      const businessId =
-        data.business_id ??
-        data.businessId ??
-        data?.business?.business_id ??
-        data?.business?.businessId ??
-        data?.merchant?.business_id ??
-        data?.merchant?.businessId ??
-        data?.profile?.business_id ??
-        data?.profile?.businessId;
-
-      const token =
-        data.token ??
-        data.accessToken ??
-        data.access_token ??
-        data?.auth?.token ??
-        data?.auth?.accessToken;
-
-      if (userId != null && businessId != null) {
-        return {
-          user_id: Number(userId),
-          business_id: Number(businessId),
-          token: token ? String(token) : null,
-          raw: data,
-        };
-      }
     }
   }
 
-  return { user_id: null, business_id: null, token: null, raw: null };
+  return {
+    user_id: null,
+    business_id: null,
+    token: null,
+    owner_type: "",
+    raw: null,
+  };
 }

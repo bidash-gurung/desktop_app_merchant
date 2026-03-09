@@ -3,8 +3,12 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import TopTabs from "./TopTabs.jsx";
 import Toolbar from "./Toolbar.jsx";
 import NotificationCard from "./NotificationCard.jsx";
+import FeedbackCard from "./FeedbackCard.jsx";
 import NotificationDrawer from "./NotificationDrawer.jsx";
 import ReplyModal from "./ReplyModal.jsx";
+import ConfirmModal from "./ConfirmModal.jsx";
+import ReportModal from "./ReportModal.jsx";
+import ToastHost, { useToasts } from "./Toasts.jsx";
 
 import {
   pickSessionIds,
@@ -17,24 +21,88 @@ import {
   listSystemNotifications,
   markAllNotificationsRead,
   markNotificationRead,
+  listFeedbacksWithMeta,
   sendFeedbackReply,
+  deleteFeedbackReply,
+  reportFeedback,
+  reportFeedbackReply,
 } from "./notificationApi.js";
 
-import { isFeedbackNotification, isUnread } from "./utils.js";
+import { isUnread, pickFeedbackId, normalizeType } from "./utils.js";
 
 const TAB_ORDERS = "orders";
 const TAB_SYSTEM = "system";
+const TAB_FEEDBACKS = "feedbacks";
+
+function toPosInt(v) {
+  const n = Number(v);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+function FeedbackTotals({ meta }) {
+  const totals = meta?.totals;
+  if (!totals) return null;
+
+  const avg = Number(totals.avg_rating ?? 0);
+  const totalRatings = Number(totals.total_ratings ?? 0);
+  const totalComments = Number(totals.total_comments ?? 0);
+  const by = totals.by_stars || {};
+  const max = Math.max(1, totalRatings);
+
+  const rows = [5, 4, 3, 2, 1].map((s) => ({
+    star: s,
+    count: Number(by[s] ?? by[String(s)] ?? 0),
+  }));
+
+  return (
+    <div className="fbSummary">
+      <div className="fbSummaryLeft">
+        <div className="fbAvg">{avg ? avg.toFixed(1) : "0.0"}</div>
+        <div className="fbAvgLabel">Average rating</div>
+
+        <div className="fbSummaryCounts">
+          <div className="fbCount">
+            <div className="fbCountN">{totalRatings}</div>
+            <div className="fbCountL">Total ratings</div>
+          </div>
+          <div className="fbCount">
+            <div className="fbCountN">{totalComments}</div>
+            <div className="fbCountL">Total comments</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="fbSummaryRight">
+        {rows.map((r) => {
+          const pct = Math.round((r.count / max) * 100);
+          return (
+            <div key={r.star} className="fbStarRow">
+              <div className="fbStarLabel">{r.star}★</div>
+              <div className="fbStarBar">
+                <div className="fbStarFill" style={{ width: `${pct}%` }} />
+              </div>
+              <div className="fbStarCount">{r.count}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default function NotificationsPage({ session }) {
+  const { toasts, toast } = useToasts();
+
   const picked = useMemo(() => {
     const fromProp = pickSessionIds(session);
     if (fromProp?.user_id && fromProp?.business_id) return fromProp;
     return getMerchantSessionFromStorage();
   }, [session]);
 
-  const business_id = picked?.business_id;
-  const user_id = picked?.user_id;
+  const business_id = toPosInt(picked?.business_id);
+  const user_id = toPosInt(picked?.user_id);
   const token = picked?.token;
+  const owner_type_session = picked?.owner_type || "food";
 
   const [activeTab, setActiveTab] = useState(TAB_ORDERS);
   const [unreadOnly, setUnreadOnly] = useState(false);
@@ -44,26 +112,23 @@ export default function NotificationsPage({ session }) {
 
   const [orders, setOrders] = useState([]);
   const [system, setSystem] = useState([]);
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [feedbackMeta, setFeedbackMeta] = useState(null);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerItem, setDrawerItem] = useState(null);
 
   const [replyOpen, setReplyOpen] = useState(false);
-  const [replyItem, setReplyItem] = useState(null);
+  const [replyTarget, setReplyTarget] = useState(null);
 
-  const ordersUnreadCount = useMemo(
-    () => orders.filter((x) => isUnread(x)).length,
-    [orders],
-  );
-  const systemCount = useMemo(() => system.length, [system]);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmKind, setConfirmKind] = useState(""); // "delete_notification" | "delete_reply"
+  const [confirmPayload, setConfirmPayload] = useState(null);
 
-  const tabs = useMemo(
-    () => [
-      { key: TAB_ORDERS, label: "Orders", count: ordersUnreadCount },
-      { key: TAB_SYSTEM, label: "System", count: systemCount },
-    ],
-    [ordersUnreadCount, systemCount],
-  );
+  // ✅ report modal
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportTarget, setReportTarget] = useState(null);
+  // reportTarget: { kind:"rating"|"reply", type:"food|mart", rating_id? , reply_id? }
 
   const canLoad = useMemo(() => {
     return (
@@ -74,42 +139,62 @@ export default function NotificationsPage({ session }) {
     );
   }, [business_id, user_id]);
 
+  const ordersUnreadCount = useMemo(
+    () => orders.filter((x) => isUnread(x)).length,
+    [orders],
+  );
+
+  const tabs = useMemo(
+    () => [
+      { key: TAB_ORDERS, label: "Orders", count: ordersUnreadCount },
+      { key: TAB_SYSTEM, label: "System", count: system.length },
+      { key: TAB_FEEDBACKS, label: "Feedbacks", count: feedbacks.length },
+    ],
+    [ordersUnreadCount, system.length, feedbacks.length],
+  );
+
   const refresh = useCallback(async () => {
     if (!canLoad) {
-      setErr("Merchant session not found. Please login again.");
+      const m = "Merchant session not found. Please login again.";
+      setErr(m);
+      toast.error(m);
       return;
     }
 
     setBusy(true);
     setErr("");
     try {
-      const [o, s] = await Promise.all([
+      const [o, s, f] = await Promise.all([
         listBusinessNotifications({
           business_id,
           token,
-          unreadOnly: activeTab === TAB_ORDERS ? unreadOnly : false, // ✅ only apply on Orders
+          unreadOnly: activeTab === TAB_ORDERS ? unreadOnly : false,
           limit: 200,
           offset: 0,
         }),
         listSystemNotifications({ user_id, token }),
+        listFeedbacksWithMeta({ business_id, token }),
       ]);
 
       setOrders(Array.isArray(o) ? o : []);
       setSystem(Array.isArray(s) ? s : []);
+      setFeedbacks(Array.isArray(f?.rows) ? f.rows : []);
+      setFeedbackMeta(f?.meta || null);
     } catch (e) {
-      setErr(e?.message || "Failed to load notifications.");
+      const m = e?.message || "Failed to load notifications.";
+      setErr(m);
+      toast.error(m);
     } finally {
       setBusy(false);
     }
-  }, [business_id, user_id, token, unreadOnly, canLoad, activeTab]);
+  }, [business_id, user_id, token, unreadOnly, canLoad, activeTab, toast]);
 
   useEffect(() => {
     refresh();
   }, [refresh]);
 
-  // ✅ when switching to System, disable unreadOnly toggle
   useEffect(() => {
-    if (activeTab === TAB_SYSTEM) setUnreadOnly(false);
+    if (activeTab !== TAB_ORDERS) setUnreadOnly(false);
   }, [activeTab]);
 
   const openDrawer = useCallback((item) => {
@@ -122,14 +207,17 @@ export default function NotificationsPage({ session }) {
     setDrawerItem(null);
   }, []);
 
-  const openReply = useCallback((item) => {
-    setReplyItem(item);
+  const openReplyForFeedback = useCallback((fb) => {
+    setConfirmOpen(false);
+    setConfirmKind("");
+    setConfirmPayload(null);
+    setReplyTarget(fb);
     setReplyOpen(true);
   }, []);
 
   const closeReply = useCallback(() => {
     setReplyOpen(false);
-    setReplyItem(null);
+    setReplyTarget(null);
   }, []);
 
   const markRead = useCallback(
@@ -146,13 +234,16 @@ export default function NotificationsPage({ session }) {
             x?.notification_id === id ? { ...x, is_read: 1 } : x,
           ),
         );
+        toast.success("Marked as read.");
       } catch (e) {
-        setErr(e?.message || "Failed to mark as read.");
+        const m = e?.message || "Failed to mark as read.";
+        setErr(m);
+        toast.error(m);
       } finally {
         setBusy(false);
       }
     },
-    [token],
+    [token, toast],
   );
 
   const markAllRead = useCallback(async () => {
@@ -163,107 +254,222 @@ export default function NotificationsPage({ session }) {
     try {
       await markAllNotificationsRead({ businessId: business_id, token });
       setOrders((prev) => prev.map((x) => ({ ...x, is_read: 1 })));
+      toast.success("All notifications marked as read.");
     } catch (e) {
-      setErr(e?.message || "Failed to mark all as read.");
+      const m = e?.message || "Failed to mark all as read.";
+      setErr(m);
+      toast.error(m);
     } finally {
       setBusy(false);
     }
-  }, [business_id, token]);
+  }, [business_id, token, toast]);
 
-  const removeOne = useCallback(
-    async (item) => {
-      const id = item?.notification_id;
-      if (!id) return;
+  /* ===================== Delete confirm flows ===================== */
 
-      const ok = window.confirm("Delete this notification?");
-      if (!ok) return;
+  const askDeleteNotification = useCallback((item) => {
+    const id = item?.notification_id || item?.id;
+    if (!id) return;
+    setConfirmKind("delete_notification");
+    setConfirmPayload({ id });
+    setConfirmOpen(true);
+  }, []);
 
-      setBusy(true);
-      setErr("");
-      try {
-        await deleteNotification({ notificationId: id, token });
-        setOrders((prev) => prev.filter((x) => x?.notification_id !== id));
-      } catch (e) {
-        setErr(e?.message || "Failed to delete notification.");
-      } finally {
-        setBusy(false);
-      }
+  const askDeleteReply = useCallback(
+    (reply, fb) => {
+      const reply_id = Number(reply?.reply_id || reply?.id || 0);
+      if (!reply_id) return;
+
+      const rating_id = pickFeedbackId(fb);
+      const type = normalizeType(fb?.owner_type || owner_type_session);
+
+      setConfirmKind("delete_reply");
+      setConfirmPayload({ reply_id, rating_id, type });
+      setConfirmOpen(true);
     },
-    [token],
+    [owner_type_session],
   );
 
-  const submitReply = useCallback(
-    async (text) => {
-      const item = replyItem;
-      if (!item) return;
+  const closeConfirm = useCallback(() => {
+    setConfirmOpen(false);
+    setConfirmKind("");
+    setConfirmPayload(null);
+  }, []);
 
-      const notification_id = item?.notification_id || item?.id;
-      if (!notification_id) {
-        setErr("Notification id not found for reply.");
-        return;
+  const confirmAction = useCallback(async () => {
+    if (!confirmKind) return;
+
+    setBusy(true);
+    setErr("");
+    try {
+      if (confirmKind === "delete_notification") {
+        const id = confirmPayload?.id;
+        await deleteNotification({ notificationId: id, token });
+
+        // delete from both safely (system uses id)
+        setOrders((prev) =>
+          prev.filter((x) => x?.notification_id !== id && x?.id !== id),
+        );
+        setSystem((prev) =>
+          prev.filter((x) => x?.notification_id !== id && x?.id !== id),
+        );
+
+        toast.success("Notification deleted.");
       }
+
+      if (confirmKind === "delete_reply") {
+        const reply_id = confirmPayload?.reply_id;
+        const type = confirmPayload?.type;
+        await deleteFeedbackReply({ reply_id, owner_type: type, token });
+        toast.success("Reply deleted.");
+        await refresh();
+      }
+
+      closeConfirm();
+    } catch (e) {
+      const m = e?.message || "Action failed.";
+      setErr(m);
+      toast.error(m);
+    } finally {
+      setBusy(false);
+    }
+  }, [confirmKind, confirmPayload, token, refresh, closeConfirm, toast]);
+
+  /* ===================== Reply submit ===================== */
+
+  const submitFeedbackReply = useCallback(
+    async (text) => {
+      const t = replyTarget;
+      const rating_id = pickFeedbackId(t);
+      const type = normalizeType(t?.owner_type || owner_type_session);
+
+      if (!rating_id) return toast.error("Feedback id not found.");
+
+      const msg = String(text || "").trim();
+      if (!msg) return toast.error("Reply text is required.");
 
       setBusy(true);
       setErr("");
       try {
         await sendFeedbackReply({
-          notification_id,
-          user_id,
+          rating_id,
+          owner_type: type,
           token,
-          reply: text,
+          text: msg,
         });
-
         closeReply();
-
-        // Optional: mark order notification read after reply
-        if (item?.notification_id) {
-          await markNotificationRead({
-            notificationId: item.notification_id,
-            token,
-          });
-          setOrders((prev) =>
-            prev.map((x) =>
-              x?.notification_id === item.notification_id
-                ? { ...x, is_read: 1 }
-                : x,
-            ),
-          );
-        }
-
-        alert("Reply sent successfully.");
+        toast.success("Reply sent successfully.");
+        await refresh();
       } catch (e) {
-        setErr(e?.message || "Failed to send reply.");
+        const m = e?.message || "Failed to send reply.";
+        setErr(m);
+        toast.error(m);
       } finally {
         setBusy(false);
       }
     },
-    [replyItem, user_id, token, closeReply],
+    [replyTarget, token, owner_type_session, closeReply, refresh, toast],
   );
 
-  const list = useMemo(() => {
-    return activeTab === TAB_SYSTEM ? system : orders;
-  }, [activeTab, system, orders]);
+  /* ===================== Report modal flow ===================== */
 
-  const emptyText = useMemo(() => {
-    if (!canLoad) return "Merchant session missing. Please login again.";
-    if (activeTab === TAB_SYSTEM) return "No system notifications.";
-    return unreadOnly ? "No unread notifications." : "No notifications.";
-  }, [activeTab, unreadOnly, canLoad]);
+  const openReport = useCallback((payload) => {
+    setReportTarget(payload || null);
+    setReportOpen(true);
+  }, []);
+
+  const closeReport = useCallback(() => {
+    setReportOpen(false);
+    setReportTarget(null);
+  }, []);
+
+  const submitReport = useCallback(
+    async (reason) => {
+      const r = String(reason || "").trim();
+      if (r.length < 3) return toast.error("Please enter a valid reason.");
+
+      if (!reportTarget) return;
+
+      setBusy(true);
+      setErr("");
+      try {
+        if (reportTarget.kind === "rating") {
+          await reportFeedback({
+            type: reportTarget.type,
+            rating_id: reportTarget.rating_id,
+            reason: r,
+            token,
+          });
+          toast.success("Feedback reported.");
+        } else {
+          await reportFeedbackReply({
+            type: reportTarget.type,
+            reply_id: reportTarget.reply_id,
+            reason: r,
+            token,
+          });
+          toast.success("Reply reported.");
+        }
+
+        closeReport();
+        await refresh();
+      } catch (e) {
+        const m = e?.message || "Failed to submit report.";
+        setErr(m);
+        toast.error(m);
+      } finally {
+        setBusy(false);
+      }
+    },
+    [reportTarget, token, refresh, closeReport, toast],
+  );
 
   const showUnreadToggle = activeTab === TAB_ORDERS;
   const showMarkAllRead = activeTab === TAB_ORDERS;
 
+  const list = useMemo(() => {
+    if (activeTab === TAB_SYSTEM) return system;
+    if (activeTab === TAB_FEEDBACKS) return feedbacks;
+    return orders;
+  }, [activeTab, system, feedbacks, orders]);
+
+  const emptyText = useMemo(() => {
+    if (!canLoad) return "Merchant session missing. Please login again.";
+    if (activeTab === TAB_SYSTEM) return "No system notifications.";
+    if (activeTab === TAB_FEEDBACKS) return "No feedbacks found.";
+    return unreadOnly ? "No unread notifications." : "No notifications.";
+  }, [activeTab, unreadOnly, canLoad]);
+
+  const confirmTitle = useMemo(() => {
+    if (confirmKind === "delete_notification") return "Delete notification?";
+    if (confirmKind === "delete_reply") return "Delete reply?";
+    return "Confirm";
+  }, [confirmKind]);
+
+  const confirmMessage = useMemo(() => {
+    if (confirmKind === "delete_notification")
+      return "This action cannot be undone.";
+    if (confirmKind === "delete_reply") return "This action cannot be undone.";
+    return "";
+  }, [confirmKind]);
+
+  const confirmVisible =
+    confirmOpen &&
+    (confirmKind === "delete_notification" || confirmKind === "delete_reply");
+
   return (
     <div className="ntPage">
+      <ToastHost toasts={toasts} onClose={toast.remove} />
+
       <div className="ntContainer">
         <div className="ntSticky">
           <Toolbar
             title="Notifications"
-            unreadOnly={showUnreadToggle ? unreadOnly : false}
+            unreadOnly={unreadOnly}
             onToggleUnread={(v) => setUnreadOnly(!!v)}
             onRefresh={refresh}
             onMarkAllRead={markAllRead}
             busy={busy}
+            showUnreadToggle={showUnreadToggle}
             showMarkAllRead={showMarkAllRead}
           />
 
@@ -275,13 +481,32 @@ export default function NotificationsPage({ session }) {
         <div className="ntScroll">
           {list.length === 0 ? (
             <div className="ntEmpty">{emptyText}</div>
+          ) : activeTab === TAB_FEEDBACKS ? (
+            <>
+              <FeedbackTotals meta={feedbackMeta} />
+
+              <div className="ntList">
+                {feedbacks.map((fb, idx) => (
+                  <FeedbackCard
+                    key={fb?.rating_id || fb?.notification_id || fb?.id || idx}
+                    item={fb}
+                    busy={busy}
+                    token={token}
+                    owner_type={owner_type_session}
+                    currentUserId={user_id}
+                    onRefresh={refresh}
+                    onReply={openReplyForFeedback}
+                    onDeleteReply={(reply) => askDeleteReply(reply, fb)}
+                    toast={toast}
+                    onReport={openReport} // ✅ IMPORTANT
+                  />
+                ))}
+              </div>
+            </>
           ) : (
             <div className="ntList">
               {list.map((item, idx) => {
                 const kind = activeTab === TAB_SYSTEM ? "system" : "orders";
-                const showReply =
-                  kind === "orders" && isFeedbackNotification(item);
-
                 return (
                   <NotificationCard
                     key={item?.notification_id || item?.id || idx}
@@ -289,10 +514,8 @@ export default function NotificationsPage({ session }) {
                     kind={kind}
                     busy={busy}
                     onOpen={() => openDrawer(item)}
-                    onMarkRead={markRead}
-                    onDelete={removeOne}
-                    onReply={() => openReply(item)}
-                    showReply={showReply}
+                    onMarkRead={kind === "orders" ? markRead : undefined}
+                    onDelete={() => askDeleteNotification(item)}
                   />
                 );
               })}
@@ -304,21 +527,41 @@ export default function NotificationsPage({ session }) {
       <NotificationDrawer
         open={drawerOpen}
         item={drawerItem}
-        onClose={() => {
-          setDrawerOpen(false);
-          setDrawerItem(null);
-        }}
+        onClose={closeDrawer}
       />
 
       <ReplyModal
         open={replyOpen}
-        item={replyItem}
+        item={replyTarget}
         busy={busy}
-        onClose={() => {
-          setReplyOpen(false);
-          setReplyItem(null);
-        }}
-        onSubmit={submitReply}
+        onClose={closeReply}
+        onSubmit={submitFeedbackReply}
+      />
+
+      {/* ✅ REPORT MODAL (no prompt) */}
+      <ReportModal
+        open={reportOpen}
+        busy={busy}
+        title={
+          reportTarget?.kind === "reply" ? "Report reply" : "Report feedback"
+        }
+        placeholder="Please describe why you are reporting..."
+        confirmText="Submit report"
+        cancelText="Cancel"
+        onCancel={closeReport}
+        onSubmit={submitReport}
+      />
+
+      <ConfirmModal
+        open={confirmVisible}
+        busy={busy}
+        title={confirmTitle}
+        message={confirmMessage}
+        confirmText="Confirm"
+        cancelText="Cancel"
+        tone="danger"
+        onCancel={closeConfirm}
+        onConfirm={confirmAction}
       />
     </div>
   );

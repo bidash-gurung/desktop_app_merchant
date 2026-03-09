@@ -8,7 +8,8 @@ export default function Toolbar({
   onRefresh,
   onMarkAllRead,
   busy,
-  showMarkAllRead = true, // ✅ NEW
+  showUnreadToggle = true,
+  showMarkAllRead = true,
 }) {
   return (
     <div className="ntHeader">
@@ -17,16 +18,18 @@ export default function Toolbar({
       </div>
 
       <div className="ntHeaderRight">
-        <label className="ntSwitch" title="Show unread only">
-          <input
-            type="checkbox"
-            checked={!!unreadOnly}
-            onChange={(e) => onToggleUnread?.(e.target.checked)}
-            disabled={!!busy}
-          />
-          <span className="ntSwitchUi" />
-          <span className="ntSwitchText">Unread only</span>
-        </label>
+        {showUnreadToggle ? (
+          <label className="ntSwitch" title="Show unread only">
+            <input
+              type="checkbox"
+              checked={!!unreadOnly}
+              onChange={(e) => onToggleUnread?.(e.target.checked)}
+              disabled={!!busy}
+            />
+            <span className="ntSwitchUi" />
+            <span className="ntSwitchText">Unread only</span>
+          </label>
+        ) : null}
 
         <button
           type="button"
@@ -37,7 +40,6 @@ export default function Toolbar({
           Refresh
         </button>
 
-        {/* ✅ Orders only */}
         {showMarkAllRead ? (
           <button
             type="button"

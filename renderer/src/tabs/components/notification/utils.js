@@ -1,10 +1,48 @@
 // src/tabs/components/notification/utils.js
 
-export function safeText(v, fallback = "—") {
+/* ===================== basic ===================== */
+export function safeText(v) {
   const s = String(v ?? "").trim();
-  return s ? s : fallback;
+  return s ? s : "—";
 }
 
+export function isUnread(n) {
+  return Number(n?.is_read ?? 0) === 0;
+}
+
+/* ===================== ids / types ===================== */
+export function pickFeedbackId(fb) {
+  const id = fb?.rating_id ?? fb?.notification_id ?? fb?.id;
+  const n = Number(id);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+/** strict: only food | mart (prevents backend "Invalid rating type") */
+export function safeType(type, fallback = "food") {
+  const t = String(type || "")
+    .trim()
+    .toLowerCase();
+  if (t === "food" || t === "mart") return t;
+
+  const f = String(fallback || "")
+    .trim()
+    .toLowerCase();
+  if (f === "food" || f === "mart") return f;
+
+  return "food";
+}
+
+/** tolerant: tries to detect "mart" from mixed values, otherwise food */
+export function normalizeType(ownerType) {
+  const t = String(ownerType || "")
+    .trim()
+    .toLowerCase();
+  if (t === "mart" || t.includes("mart")) return "mart";
+  if (t === "food" || t.includes("food")) return "food";
+  return "food";
+}
+
+/* ===================== time ===================== */
 export function fmtDateTime(v) {
   if (!v) return "—";
   const d = new Date(v);
@@ -12,34 +50,121 @@ export function fmtDateTime(v) {
   return d.toLocaleString();
 }
 
-export function isUnread(item) {
-  return Number(item?.is_read ?? item?.isRead ?? 0) === 0;
+export function fmtRelativeTime({ hours_ago } = {}) {
+  const h = Number(hours_ago);
+  if (!Number.isFinite(h)) return "—";
+  if (h <= 0) return "Just now";
+  if (h === 1) return "1 hour ago";
+  if (h < 24) return `${h} hours ago`;
+  const days = Math.floor(h / 24);
+  return days === 1 ? "1 day ago" : `${days} days ago`;
 }
 
-/**
- * Identify "feedback-ish" notifications.
- * Adjust these checks based on your actual notification.type values.
- */
-export function isFeedbackNotification(item) {
-  const type = String(item?.type || "").toLowerCase();
-  const title = String(item?.title || "").toLowerCase();
-  const body = String(item?.body_preview || item?.message || "").toLowerCase();
+/* ===================== rating / reply normalization ===================== */
+export function normalizeFeedback(raw) {
+  const fb = raw || {};
+  const user = fb.user || {};
 
-  return (
-    type.includes("feedback") ||
-    type.includes("rating") ||
-    type.includes("review") ||
-    title.includes("rating") ||
-    title.includes("review") ||
-    body.includes("rating") ||
-    body.includes("review")
-  );
+  const id = fb.id ?? fb.rating_id ?? fb.notification_id ?? null;
+
+  return {
+    ...fb,
+
+    // ids
+    id,
+    rating_id: fb.rating_id ?? fb.id ?? fb.notification_id ?? null,
+
+    // types
+    owner_type: fb.owner_type || fb.type || fb.rating_type || "",
+    rating_type: fb.rating_type || fb.owner_type || fb.type || "",
+
+    // content
+    rating: fb.rating ?? fb.stars ?? null,
+    comment: fb.comment ?? fb.message ?? fb.text ?? "",
+    likes_count: Number(fb.likes_count ?? fb.likes ?? 0),
+
+    // time
+    created_at: fb.created_at ?? fb.ts ?? fb.date ?? null,
+    hours_ago: fb.hours_ago ?? null,
+
+    // user (flattened helpers used by some UIs)
+    user_name: user.user_name ?? fb.user_name ?? fb.customer_name ?? null,
+    profile_image: user.profile_image ?? fb.profile_image ?? null,
+
+    // replies
+    replies: Array.isArray(fb.replies) ? fb.replies : [],
+    reply_count:
+      Number(
+        fb.reply_count ?? (Array.isArray(fb.replies) ? fb.replies.length : 0),
+      ) || 0,
+  };
 }
 
-export function toneFromType(item) {
-  const type = String(item?.type || "").toLowerCase();
-  if (type.includes("success") || type.includes("paid")) return "success";
-  if (type.includes("warn") || type.includes("cancel")) return "warn";
-  if (type.includes("error") || type.includes("fail")) return "danger";
+export function normalizeReply(raw) {
+  const r = raw || {};
+  const user = r.user || {};
+
+  return {
+    ...r,
+
+    id: r.id ?? r.reply_id ?? null,
+    reply_id: r.reply_id ?? r.id ?? null,
+
+    // message text (different backends may use different field names)
+    text: r.text ?? r.message ?? r.reply ?? "",
+    message: r.text ?? r.message ?? r.reply ?? "",
+
+    // time
+    ts: r.ts ?? r.created_at ?? null,
+    created_at: r.created_at ?? r.ts ?? null,
+    hours_ago: r.hours_ago ?? null,
+
+    // user (flatten for UI)
+    user_id: r.user_id ?? user.user_id ?? null,
+    user_name: user.user_name ?? r.user_name ?? null,
+    profile_image: user.profile_image ?? r.profile_image ?? null,
+  };
+}
+
+/* ===================== ui helpers ===================== */
+export function starsText(n) {
+  const x = Math.max(0, Math.min(5, Number(n) || 0));
+  return "★★★★★".slice(0, x) + "☆☆☆☆☆".slice(0, 5 - x);
+}
+
+/** used by NotificationCard.jsx */
+export function toneFromType(type) {
+  const t = String(type || "")
+    .trim()
+    .toLowerCase();
+
+  if (
+    t === "success" ||
+    t === "ok" ||
+    t === "paid" ||
+    t === "completed" ||
+    t === "delivered"
+  )
+    return "success";
+
+  if (
+    t === "warn" ||
+    t === "warning" ||
+    t === "pending" ||
+    t === "scheduled" ||
+    t === "expired"
+  )
+    return "warn";
+
+  if (
+    t === "danger" ||
+    t === "error" ||
+    t === "failed" ||
+    t === "cancelled" ||
+    t === "canceled" ||
+    t === "rejected"
+  )
+    return "danger";
+
   return "neutral";
 }

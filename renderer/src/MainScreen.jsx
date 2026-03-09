@@ -5,9 +5,11 @@ import "./css/main.css";
 import HomeTab from "./tabs/HomeTab";
 import OrdersTab from "./tabs/OrdersTab";
 import AddItemsTab from "./tabs/AddItemsTab";
-import BannerTab from "./tabs/BannerTab"; // ✅ NEW
+import BannerTab from "./tabs/BannerTab";
 import NotificationsTab from "./tabs/NotificationsTab";
-import PayoutsTab from "./tabs/PayoutsTab";
+import WalletTab from "./tabs/WalletTab"; // ✅ ADDED
+import SalesTab from "./tabs/SalesTab"; // ✅ ADDED
+import ProfileTab from "./tabs/ProfileTab"; // ✅ ADDED
 
 import { connectSocket, disconnectSocket } from "./realtime/socket";
 
@@ -21,9 +23,11 @@ const TABS = [
   { id: "home", label: "Home", icon: HomeIcon },
   { id: "orders", label: "Orders", icon: OrdersIcon },
   { id: "add", label: "Add Items", icon: AddIcon },
-  { id: "banner", label: "Banner", icon: BannerIcon }, // ✅ NEW (after Add Items)
+  { id: "banner", label: "Banner", icon: BannerIcon },
   { id: "notifications", label: "Notifications", icon: BellIcon },
-  { id: "payouts", label: "Payouts", icon: WalletIcon },
+  { id: "wallet", label: "Wallet", icon: WalletIcon },
+  { id: "sales", label: "Sales", icon: GraphIcon }, // ✅ NEW (before profile)
+  { id: "profile", label: "Profile", icon: UserIcon },
 ];
 
 function joinUrl(prefix, path) {
@@ -60,8 +64,6 @@ function buildUrl(base, id) {
 }
 
 function isNewOrderNotify(ev) {
-  // server sends:
-  // { id, type, orderId, business_id, createdAt, data:{title, body, totals} }
   const t = String(ev?.type || "").toLowerCase();
   return t.includes("order:create") || t.includes("order:create".toLowerCase());
 }
@@ -76,6 +78,8 @@ export default function MainScreen({ session, onLogout }) {
   // ✅ keep active tab after refresh
   const [active, setActive] = React.useState(() => {
     const saved = localStorage.getItem(ACTIVE_TAB_KEY);
+    // if old value was "payouts", fallback to wallet
+    if (saved === "payouts") return "wallet";
     return saved || "home";
   });
 
@@ -208,12 +212,16 @@ export default function MainScreen({ session, onLogout }) {
         return <OrdersTab session={session} />;
       case "add":
         return <AddItemsTab session={session} />;
-      case "banner": // ✅ NEW
+      case "banner":
         return <BannerTab session={session} />;
       case "notifications":
         return <NotificationsTab session={session} />;
-      case "payouts":
-        return <PayoutsTab session={session} />;
+      case "wallet":
+        return <WalletTab session={session} />;
+      case "sales": // ✅ NEW
+        return <SalesTab session={session} />;
+      case "profile":
+        return <ProfileTab session={session} />;
       default:
         return <HomeTab session={session} />;
     }
@@ -248,13 +256,11 @@ export default function MainScreen({ session, onLogout }) {
       raw: ev,
     };
 
-    // ✅ keep it until user clicks X or clicks the toast
-    setToasts((prev) => [item, ...prev].slice(0, 6)); // you can increase the max
+    setToasts((prev) => [item, ...prev].slice(0, 6));
   }, []);
 
   const onToastClick = React.useCallback(
     (t) => {
-      // keep logic simple: jump to Orders tab to view
       setActive("orders");
       try {
         localStorage.setItem(ACTIVE_TAB_KEY, "orders");
@@ -278,7 +284,6 @@ export default function MainScreen({ session, onLogout }) {
 
   /* ------------------- ✅ SOCKET.IO realtime (GLOBAL) ------------------- */
   React.useEffect(() => {
-    // connect once per user/session
     if (!userId || !businessId) {
       console.log("[socket] ⚠️ not connecting (missing ids)", {
         userId,
@@ -287,12 +292,10 @@ export default function MainScreen({ session, onLogout }) {
       return;
     }
 
-    // DEV_NOAUTH is true on your backend right now
-    // so we must pass devUserId + devRole (merchant) + business_id
     const s = connectSocket({
-      token, // for later (when DEV_NOAUTH=false)
+      token,
       devUserId: userId,
-      devRole: "merchant", // ✅ static
+      devRole: "merchant",
       business_id: businessId,
       business_ids: [businessId],
       businessId,
@@ -316,20 +319,15 @@ export default function MainScreen({ session, onLogout }) {
     const onConnectError = (err) =>
       console.log("[socket] ❌ connect_error (MainScreen)", err);
 
-    // ✅ IMPORTANT: server emits "notify"
     const onNotify = (data) => {
       console.log("[socket] 🔔 notify:", data);
-
-      // show toast for new order (or show for any notify — you can decide)
       if (isNewOrderNotify(data)) pushToast(data);
-      else pushToast(data); // keep it on for now so you see everything
+      else pushToast(data);
     };
 
-    // optional status events from server
     const onOrderStatus = (data) =>
       console.log("[socket] 📦 order:status:", data);
 
-    // debug: show all events
     const onAny = (event, ...args) =>
       console.log(`[socket] 📩 event "${event}"`, ...args);
 
@@ -601,8 +599,6 @@ function AddIcon() {
     </svg>
   );
 }
-
-/* ✅ NEW: Banner icon (billboard/banner) */
 function BannerIcon() {
   return (
     <svg
@@ -612,21 +608,18 @@ function BannerIcon() {
       fill="none"
       aria-hidden="true"
     >
-      {/* poles */}
       <path
         d="M6 3v18M18 3v18"
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
       />
-      {/* banner board */}
       <path
         d="M7 6h10a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H7a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Z"
         stroke="currentColor"
         strokeWidth="2"
         strokeLinejoin="round"
       />
-      {/* ad lines */}
       <path
         d="M9 9h6M9 12h6"
         stroke="currentColor"
@@ -636,7 +629,6 @@ function BannerIcon() {
     </svg>
   );
 }
-
 function BellIcon() {
   return (
     <svg
@@ -680,6 +672,75 @@ function WalletIcon() {
         d="M21 10h-4a2 2 0 0 0 0 4h4"
         stroke="currentColor"
         strokeWidth="2"
+      />
+    </svg>
+  );
+}
+
+/* ✅ NEW graph icon */
+function GraphIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M4 19V5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M4 19H20"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+
+      <path
+        d="M6 15l4-4 3 3 5-6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+
+      <path
+        d="M10 11.2a.9.9 0 1 0 0-1.8.9.9 0 0 0 0 1.8Z"
+        fill="currentColor"
+      />
+      <path
+        d="M13 14.2a.9.9 0 1 0 0-1.8.9.9 0 0 0 0 1.8Z"
+        fill="currentColor"
+      />
+      <path d="M18 8.2a.9.9 0 1 0 0-1.8.9.9 0 0 0 0 1.8Z" fill="currentColor" />
+    </svg>
+  );
+}
+
+function UserIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M20 21a8 8 0 0 0-16 0"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
       />
     </svg>
   );

@@ -1,0 +1,376 @@
+/* src/tabs/components/sales/css/sales.css */
+
+.slWrap {
+  padding: 18px;
+}
+
+/* Header */
+.slHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.slTitle {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 950;
+  letter-spacing: 0.2px;
+}
+
+.slSub {
+  margin-top: 6px;
+  opacity: 0.8;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.slDot {
+  margin: 0 8px;
+  opacity: 0.6;
+}
+
+.slMuted {
+  opacity: 0.75;
+}
+
+/* Toolbar */
+.slToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(10, 10, 15, 0.08);
+  background: rgba(246, 247, 251, 0.75);
+  backdrop-filter: blur(8px);
+  margin-bottom: 14px;
+}
+
+.slSegment {
+  display: inline-flex;
+  border: 1px solid rgba(10, 10, 15, 0.1);
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.slSegBtn {
+  padding: 10px 12px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.slSegBtn.active {
+  background: rgba(10, 10, 15, 0.08);
+  opacity: 1;
+}
+
+.slFilters {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.slField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.slLabel {
+  font-size: 12px;
+  font-weight: 850;
+  opacity: 0.75;
+}
+
+.slInput {
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(10, 10, 15, 0.12);
+  background: rgba(255, 255, 255, 0.9);
+  outline: none;
+}
+
+.slInput:focus {
+  border-color: rgba(106, 0, 235, 0.35);
+  box-shadow: 0 0 0 4px rgba(106, 0, 235, 0.12);
+}
+
+.slActions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Buttons */
+.slBtn {
+  height: 38px;
+  border-radius: 12px;
+  padding: 0 14px;
+  border: 1px solid rgba(10, 10, 15, 0.12);
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.slBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.slBtnPrimary {
+  background: rgba(106, 0, 235, 0.95);
+  color: #fff;
+  border-color: rgba(106, 0, 235, 0.25);
+}
+
+.slBtnGhost {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* Report area to export */
+.slReport {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: #ffffff;
+  border-radius: 16px;
+}
+
+/* Top row */
+.slTopRow {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 12px;
+}
+
+@media (max-width: 980px) {
+  .slTopRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Cards */
+.slCards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .slCards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.slCard {
+  border: 1px solid rgba(10, 10, 15, 0.08);
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 8px 26px rgba(10, 10, 15, 0.05);
+}
+
+.slCardMini {
+  padding: 14px;
+}
+
+.slK {
+  font-size: 12px;
+  font-weight: 900;
+  opacity: 0.7;
+}
+
+.slV {
+  margin-top: 6px;
+  font-size: 20px;
+  font-weight: 950;
+}
+
+.slS {
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* Small meta right */
+.slMiniMeta {
+  border: 1px solid rgba(10, 10, 15, 0.08);
+  border-radius: 16px;
+  background: rgba(246, 247, 251, 0.55);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.slMiniMetaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.slMiniK {
+  font-size: 12px;
+  font-weight: 900;
+  opacity: 0.7;
+}
+
+.slMiniV {
+  font-size: 13px;
+  font-weight: 950;
+}
+
+/* Chart */
+.slCardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.slCardHeadRow {
+  align-items: center;
+}
+
+.slCardTitle {
+  font-size: 15px;
+  font-weight: 950;
+  margin: 0;
+}
+
+.slCardSub {
+  margin-top: 4px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.slChartBox {
+  height: 340px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slEmpty {
+  height: 320px;
+  width: 100%;
+  border-radius: 14px;
+  border: 1px dashed rgba(10, 10, 15, 0.18);
+  display: grid;
+  place-items: center;
+  opacity: 0.7;
+}
+
+/* Totals pill */
+.slTotalsPill {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  border-radius: 999px;
+  padding: 8px 12px;
+  border: 1px solid rgba(10, 10, 15, 0.1);
+  background: rgba(246, 247, 251, 0.75);
+}
+
+.slTotalsPillLabel {
+  font-size: 12px;
+  font-weight: 900;
+  opacity: 0.7;
+}
+
+.slTotalsPillVal {
+  font-size: 13px;
+  font-weight: 950;
+}
+
+/* Table */
+.slTableWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.slTableTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.slSearch {
+  width: min(420px, 100%);
+}
+
+.slTableScroll {
+  overflow: auto;
+  border-radius: 14px;
+  border: 1px solid rgba(10, 10, 15, 0.08);
+}
+
+.slTable {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.98);
+}
+
+.slTable thead th {
+  text-align: left;
+  padding: 12px;
+  font-size: 12px;
+  font-weight: 950;
+  opacity: 0.75;
+  background: rgba(246, 247, 251, 0.8);
+  border-bottom: 1px solid rgba(10, 10, 15, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.slTable tbody td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(10, 10, 15, 0.06);
+  font-size: 13px;
+}
+
+.slTdMono {
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  font-size: 12.5px;
+}
+
+.slEmptyRow {
+  padding: 18px !important;
+  text-align: center;
+  opacity: 0.7;
+}
+
+/* Error */
+.slError {
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  background: rgba(220, 38, 38, 0.06);
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+
+.slErrorTitle {
+  font-weight: 950;
+  margin-bottom: 4px;
+}
+
+.slErrorMsg {
+  opacity: 0.85;
+}
