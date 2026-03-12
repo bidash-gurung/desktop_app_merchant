@@ -1,4 +1,3 @@
-// src/tabs/components/notification/NotificationsPage.jsx
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import TopTabs from "./TopTabs.jsx";
 import Toolbar from "./Toolbar.jsx";
@@ -17,11 +16,15 @@ import {
 
 import {
   deleteNotification,
+  deleteUserNotification,
   listBusinessNotifications,
-  listSystemNotifications,
-  markAllNotificationsRead,
-  markNotificationRead,
   listFeedbacksWithMeta,
+  listSystemNotifications,
+  listUserNotifications,
+  markAllNotificationsRead,
+  markAllUserNotificationsRead,
+  markNotificationRead,
+  markUserNotificationRead,
   sendFeedbackReply,
   deleteFeedbackReply,
   reportFeedback,
@@ -30,6 +33,7 @@ import {
 
 import { isUnread, pickFeedbackId, normalizeType } from "./utils.js";
 
+const TAB_GENERAL = "general";
 const TAB_ORDERS = "orders";
 const TAB_SYSTEM = "system";
 const TAB_FEEDBACKS = "feedbacks";
@@ -104,12 +108,13 @@ export default function NotificationsPage({ session }) {
   const token = picked?.token;
   const owner_type_session = picked?.owner_type || "food";
 
-  const [activeTab, setActiveTab] = useState(TAB_ORDERS);
+  const [activeTab, setActiveTab] = useState(TAB_GENERAL);
   const [unreadOnly, setUnreadOnly] = useState(false);
 
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
 
+  const [general, setGeneral] = useState([]);
   const [orders, setOrders] = useState([]);
   const [system, setSystem] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
@@ -122,13 +127,11 @@ export default function NotificationsPage({ session }) {
   const [replyTarget, setReplyTarget] = useState(null);
 
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [confirmKind, setConfirmKind] = useState(""); // "delete_notification" | "delete_reply"
+  const [confirmKind, setConfirmKind] = useState("");
   const [confirmPayload, setConfirmPayload] = useState(null);
 
-  // ✅ report modal
   const [reportOpen, setReportOpen] = useState(false);
   const [reportTarget, setReportTarget] = useState(null);
-  // reportTarget: { kind:"rating"|"reply", type:"food|mart", rating_id? , reply_id? }
 
   const canLoad = useMemo(() => {
     return (
@@ -139,6 +142,11 @@ export default function NotificationsPage({ session }) {
     );
   }, [business_id, user_id]);
 
+  const generalUnreadCount = useMemo(
+    () => general.filter((x) => isUnread(x)).length,
+    [general],
+  );
+
   const ordersUnreadCount = useMemo(
     () => orders.filter((x) => isUnread(x)).length,
     [orders],
@@ -146,11 +154,12 @@ export default function NotificationsPage({ session }) {
 
   const tabs = useMemo(
     () => [
+      { key: TAB_GENERAL, label: "General", count: generalUnreadCount },
       { key: TAB_ORDERS, label: "Orders", count: ordersUnreadCount },
       { key: TAB_SYSTEM, label: "System", count: system.length },
       { key: TAB_FEEDBACKS, label: "Feedbacks", count: feedbacks.length },
     ],
-    [ordersUnreadCount, system.length, feedbacks.length],
+    [generalUnreadCount, ordersUnreadCount, system.length, feedbacks.length],
   );
 
   const refresh = useCallback(async () => {
@@ -163,12 +172,23 @@ export default function NotificationsPage({ session }) {
 
     setBusy(true);
     setErr("");
+
     try {
-      const [o, s, f] = await Promise.all([
+      const generalUnreadFlag = activeTab === TAB_GENERAL ? unreadOnly : false;
+      const orderUnreadFlag = activeTab === TAB_ORDERS ? unreadOnly : false;
+
+      const [g, o, s, f] = await Promise.all([
+        listUserNotifications({
+          user_id,
+          token,
+          unreadOnly: generalUnreadFlag,
+          limit: 200,
+          offset: 0,
+        }),
         listBusinessNotifications({
           business_id,
           token,
-          unreadOnly: activeTab === TAB_ORDERS ? unreadOnly : false,
+          unreadOnly: orderUnreadFlag,
           limit: 200,
           offset: 0,
         }),
@@ -176,6 +196,7 @@ export default function NotificationsPage({ session }) {
         listFeedbacksWithMeta({ business_id, token }),
       ]);
 
+      setGeneral(Array.isArray(g) ? g : []);
       setOrders(Array.isArray(o) ? o : []);
       setSystem(Array.isArray(s) ? s : []);
       setFeedbacks(Array.isArray(f?.rows) ? f.rows : []);
@@ -194,7 +215,9 @@ export default function NotificationsPage({ session }) {
   }, [refresh]);
 
   useEffect(() => {
-    if (activeTab !== TAB_ORDERS) setUnreadOnly(false);
+    if (activeTab !== TAB_GENERAL && activeTab !== TAB_ORDERS) {
+      setUnreadOnly(false);
+    }
   }, [activeTab]);
 
   const openDrawer = useCallback((item) => {
@@ -246,33 +269,92 @@ export default function NotificationsPage({ session }) {
     [token, toast],
   );
 
-  const markAllRead = useCallback(async () => {
-    if (!business_id) return;
+  const markGeneralRead = useCallback(
+    async (item) => {
+      const id = Number(item?.id || 0);
+      if (!id) return;
 
-    setBusy(true);
-    setErr("");
-    try {
-      await markAllNotificationsRead({ businessId: business_id, token });
-      setOrders((prev) => prev.map((x) => ({ ...x, is_read: 1 })));
-      toast.success("All notifications marked as read.");
-    } catch (e) {
-      const m = e?.message || "Failed to mark all as read.";
-      setErr(m);
-      toast.error(m);
-    } finally {
-      setBusy(false);
+      setBusy(true);
+      setErr("");
+      try {
+        await markUserNotificationRead({ notificationId: id, token });
+        setGeneral((prev) =>
+          prev.map((x) =>
+            Number(x?.id) === id ? { ...x, status: "read" } : x,
+          ),
+        );
+        toast.success("Marked as read.");
+      } catch (e) {
+        const m = e?.message || "Failed to mark as read.";
+        setErr(m);
+        toast.error(m);
+      } finally {
+        setBusy(false);
+      }
+    },
+    [token, toast],
+  );
+
+  const markAllRead = useCallback(async () => {
+    if (activeTab === TAB_GENERAL) {
+      if (!user_id) return;
+
+      setBusy(true);
+      setErr("");
+      try {
+        await markAllUserNotificationsRead({ user_id, token });
+        setGeneral((prev) => prev.map((x) => ({ ...x, status: "read" })));
+        toast.success("All general notifications marked as read.");
+      } catch (e) {
+        const m = e?.message || "Failed to mark all as read.";
+        setErr(m);
+        toast.error(m);
+      } finally {
+        setBusy(false);
+      }
+      return;
     }
-  }, [business_id, token, toast]);
+
+    if (activeTab === TAB_ORDERS) {
+      if (!business_id) return;
+
+      setBusy(true);
+      setErr("");
+      try {
+        await markAllNotificationsRead({ businessId: business_id, token });
+        setOrders((prev) => prev.map((x) => ({ ...x, is_read: 1 })));
+        toast.success("All order notifications marked as read.");
+      } catch (e) {
+        const m = e?.message || "Failed to mark all as read.";
+        setErr(m);
+        toast.error(m);
+      } finally {
+        setBusy(false);
+      }
+    }
+  }, [activeTab, business_id, user_id, token, toast]);
 
   /* ===================== Delete confirm flows ===================== */
 
-  const askDeleteNotification = useCallback((item) => {
-    const id = item?.notification_id || item?.id;
-    if (!id) return;
-    setConfirmKind("delete_notification");
-    setConfirmPayload({ id });
-    setConfirmOpen(true);
-  }, []);
+  const askDeleteNotification = useCallback(
+    (item) => {
+      if (activeTab === TAB_GENERAL) {
+        const id = Number(item?.id || 0);
+        if (!id) return;
+        setConfirmKind("delete_general_notification");
+        setConfirmPayload({ id });
+        setConfirmOpen(true);
+        return;
+      }
+
+      const id = item?.notification_id || item?.id;
+      if (!id) return;
+      setConfirmKind("delete_notification");
+      setConfirmPayload({ id });
+      setConfirmOpen(true);
+    },
+    [activeTab],
+  );
 
   const askDeleteReply = useCallback(
     (reply, fb) => {
@@ -301,11 +383,17 @@ export default function NotificationsPage({ session }) {
     setBusy(true);
     setErr("");
     try {
+      if (confirmKind === "delete_general_notification") {
+        const id = Number(confirmPayload?.id || 0);
+        await deleteUserNotification({ notificationId: id, token });
+        setGeneral((prev) => prev.filter((x) => Number(x?.id) !== id));
+        toast.success("Notification deleted.");
+      }
+
       if (confirmKind === "delete_notification") {
         const id = confirmPayload?.id;
         await deleteNotification({ notificationId: id, token });
 
-        // delete from both safely (system uses id)
         setOrders((prev) =>
           prev.filter((x) => x?.notification_id !== id && x?.id !== id),
         );
@@ -386,7 +474,6 @@ export default function NotificationsPage({ session }) {
     async (reason) => {
       const r = String(reason || "").trim();
       if (r.length < 3) return toast.error("Please enter a valid reason.");
-
       if (!reportTarget) return;
 
       setBusy(true);
@@ -423,29 +510,39 @@ export default function NotificationsPage({ session }) {
     [reportTarget, token, refresh, closeReport, toast],
   );
 
-  const showUnreadToggle = activeTab === TAB_ORDERS;
-  const showMarkAllRead = activeTab === TAB_ORDERS;
+  const showUnreadToggle =
+    activeTab === TAB_GENERAL || activeTab === TAB_ORDERS;
+  const showMarkAllRead = activeTab === TAB_GENERAL || activeTab === TAB_ORDERS;
 
   const list = useMemo(() => {
+    if (activeTab === TAB_GENERAL) return general;
     if (activeTab === TAB_SYSTEM) return system;
     if (activeTab === TAB_FEEDBACKS) return feedbacks;
     return orders;
-  }, [activeTab, system, feedbacks, orders]);
+  }, [activeTab, general, system, feedbacks, orders]);
 
   const emptyText = useMemo(() => {
     if (!canLoad) return "Merchant session missing. Please login again.";
+    if (activeTab === TAB_GENERAL)
+      return unreadOnly
+        ? "No unread general notifications."
+        : "No general notifications.";
     if (activeTab === TAB_SYSTEM) return "No system notifications.";
     if (activeTab === TAB_FEEDBACKS) return "No feedbacks found.";
     return unreadOnly ? "No unread notifications." : "No notifications.";
   }, [activeTab, unreadOnly, canLoad]);
 
   const confirmTitle = useMemo(() => {
+    if (confirmKind === "delete_general_notification")
+      return "Delete notification?";
     if (confirmKind === "delete_notification") return "Delete notification?";
     if (confirmKind === "delete_reply") return "Delete reply?";
     return "Confirm";
   }, [confirmKind]);
 
   const confirmMessage = useMemo(() => {
+    if (confirmKind === "delete_general_notification")
+      return "This action cannot be undone.";
     if (confirmKind === "delete_notification")
       return "This action cannot be undone.";
     if (confirmKind === "delete_reply") return "This action cannot be undone.";
@@ -454,7 +551,9 @@ export default function NotificationsPage({ session }) {
 
   const confirmVisible =
     confirmOpen &&
-    (confirmKind === "delete_notification" || confirmKind === "delete_reply");
+    (confirmKind === "delete_general_notification" ||
+      confirmKind === "delete_notification" ||
+      confirmKind === "delete_reply");
 
   return (
     <div className="ntPage">
@@ -498,7 +597,7 @@ export default function NotificationsPage({ session }) {
                     onReply={openReplyForFeedback}
                     onDeleteReply={(reply) => askDeleteReply(reply, fb)}
                     toast={toast}
-                    onReport={openReport} // ✅ IMPORTANT
+                    onReport={openReport}
                   />
                 ))}
               </div>
@@ -506,7 +605,13 @@ export default function NotificationsPage({ session }) {
           ) : (
             <div className="ntList">
               {list.map((item, idx) => {
-                const kind = activeTab === TAB_SYSTEM ? "system" : "orders";
+                const kind =
+                  activeTab === TAB_GENERAL
+                    ? "general"
+                    : activeTab === TAB_SYSTEM
+                      ? "system"
+                      : "orders";
+
                 return (
                   <NotificationCard
                     key={item?.notification_id || item?.id || idx}
@@ -514,7 +619,13 @@ export default function NotificationsPage({ session }) {
                     kind={kind}
                     busy={busy}
                     onOpen={() => openDrawer(item)}
-                    onMarkRead={kind === "orders" ? markRead : undefined}
+                    onMarkRead={
+                      kind === "general"
+                        ? markGeneralRead
+                        : kind === "orders"
+                          ? markRead
+                          : undefined
+                    }
                     onDelete={() => askDeleteNotification(item)}
                   />
                 );
@@ -538,7 +649,6 @@ export default function NotificationsPage({ session }) {
         onSubmit={submitFeedbackReply}
       />
 
-      {/* ✅ REPORT MODAL (no prompt) */}
       <ReportModal
         open={reportOpen}
         busy={busy}

@@ -7,15 +7,18 @@ import OrdersTab from "./tabs/OrdersTab";
 import AddItemsTab from "./tabs/AddItemsTab";
 import BannerTab from "./tabs/BannerTab";
 import NotificationsTab from "./tabs/NotificationsTab";
-import WalletTab from "./tabs/WalletTab"; // ✅ ADDED
-import SalesTab from "./tabs/SalesTab"; // ✅ ADDED
-import ProfileTab from "./tabs/ProfileTab"; // ✅ ADDED
+import WalletTab from "./tabs/WalletTab";
+import SalesTab from "./tabs/SalesTab";
+import ProfileTab from "./tabs/ProfileTab";
+import GlobalChatWidget from "./tabs/components/GlobalChatWidget";
 
 import { connectSocket, disconnectSocket } from "./realtime/socket";
 
-const MERCHANT_LOGO_PREFIX = import.meta.env.VITE_MERCHANT_LOGO;
-const PROFILE_IMAGE_PREFIX = import.meta.env.VITE_PROFILE_IMAGE;
-const PROFILE_ENDPOINT = import.meta.env.VITE_PROFILE_ENDPOINT; // https://grab.newedge.bt/driver/api/profile/{user_id}
+const MERCHANT_LOGO_PREFIX = import.meta.env.VITE_MERCHANT_LOGO_PREFIX;
+const PROFILE_IMAGE_PREFIX =
+  import.meta.env.VITE_PROFILE_IMAGE_PREFIX ||
+  import.meta.env.VITE_PROFILE_IMAGE;
+const PROFILE_ENDPOINT = import.meta.env.VITE_PROFILE_ENDPOINT;
 
 const ACTIVE_TAB_KEY = "merchant_active_tab_v1";
 
@@ -26,7 +29,7 @@ const TABS = [
   { id: "banner", label: "Banner", icon: BannerIcon },
   { id: "notifications", label: "Notifications", icon: BellIcon },
   { id: "wallet", label: "Wallet", icon: WalletIcon },
-  { id: "sales", label: "Sales", icon: GraphIcon }, // ✅ NEW (before profile)
+  { id: "sales", label: "Sales", icon: GraphIcon },
   { id: "profile", label: "Profile", icon: UserIcon },
 ];
 
@@ -63,10 +66,10 @@ function buildUrl(base, id) {
   return base.endsWith("/") ? `${base}${id}` : `${base}/${id}`;
 }
 
-function isNewOrderNotify(ev) {
-  const t = String(ev?.type || "").toLowerCase();
-  return t.includes("order:create") || t.includes("order:create".toLowerCase());
-}
+// function isNewOrderNotify(ev) {
+//   const t = String(ev?.type || "").toLowerCase();
+//   return t.includes("order:create") || t.includes("order:create".toLowerCase());
+// }
 
 function fmtMoney(v) {
   const n = Number(v);
@@ -75,10 +78,8 @@ function fmtMoney(v) {
 }
 
 export default function MainScreen({ session, onLogout }) {
-  // ✅ keep active tab after refresh
   const [active, setActive] = React.useState(() => {
     const saved = localStorage.getItem(ACTIVE_TAB_KEY);
-    // if old value was "payouts", fallback to wallet
     if (saved === "payouts") return "wallet";
     return saved || "home";
   });
@@ -87,17 +88,17 @@ export default function MainScreen({ session, onLogout }) {
     try {
       localStorage.setItem(ACTIVE_TAB_KEY, active);
     } catch {
-      // Ignore localStorage errors
+      console.warn("Failed to save active tab to localStorage:", active);
     }
   }, [active]);
 
   const [bizLogoBroken, setBizLogoBroken] = React.useState(false);
 
-  // profile image is fetched (not taken from session)
   const [profileBroken, setProfileBroken] = React.useState(false);
   const [profileLoading, setProfileLoading] = React.useState(false);
   const [profileErr, setProfileErr] = React.useState("");
   const [profileImagePath, setProfileImagePath] = React.useState("");
+  const [profileRefreshKey, setProfileRefreshKey] = React.useState(0);
 
   const payload = session?.payload || session || {};
   const user = payload?.user || payload?.data?.user || null;
@@ -122,7 +123,6 @@ export default function MainScreen({ session, onLogout }) {
   const businessLogoPath = user?.business_logo || "";
   const address = user?.address || "";
 
-  // ✅ show full name (from session first; falls back to profile API if present)
   const sessionFullName = String(user?.user_name || "").trim();
   const [profileFullName, setProfileFullName] = React.useState("");
   const fullUserName = (sessionFullName || profileFullName || "User").trim();
@@ -137,7 +137,17 @@ export default function MainScreen({ session, onLogout }) {
       ? joinUrl(PROFILE_IMAGE_PREFIX, profileImagePath)
       : "";
 
-  // ✅ fetch profile_image (+ user_name as fallback) from profile endpoint
+  React.useEffect(() => {
+    const onProfileUpdated = () => {
+      setProfileRefreshKey((v) => v + 1);
+    };
+
+    window.addEventListener("merchant:profile-updated", onProfileUpdated);
+    return () => {
+      window.removeEventListener("merchant:profile-updated", onProfileUpdated);
+    };
+  }, []);
+
   React.useEffect(() => {
     let alive = true;
     const ctrl = new AbortController();
@@ -202,7 +212,7 @@ export default function MainScreen({ session, onLogout }) {
       alive = false;
       ctrl.abort();
     };
-  }, [PROFILE_ENDPOINT, userId, token, sessionFullName]);
+  }, [PROFILE_ENDPOINT, userId, token, sessionFullName, profileRefreshKey]);
 
   function renderContent() {
     switch (active) {
@@ -218,7 +228,7 @@ export default function MainScreen({ session, onLogout }) {
         return <NotificationsTab session={session} />;
       case "wallet":
         return <WalletTab session={session} />;
-      case "sales": // ✅ NEW
+      case "sales":
         return <SalesTab session={session} />;
       case "profile":
         return <ProfileTab session={session} />;
@@ -227,7 +237,6 @@ export default function MainScreen({ session, onLogout }) {
     }
   }
 
-  /* ------------------- ✅ Floating Toast Notifications ------------------- */
   const [toasts, setToasts] = React.useState([]);
 
   const removeToast = React.useCallback((id) => {
@@ -265,7 +274,7 @@ export default function MainScreen({ session, onLogout }) {
       try {
         localStorage.setItem(ACTIVE_TAB_KEY, "orders");
       } catch {
-        // Ignore localStorage errors
+        console.warn("Failed to save active tab to localStorage:", "orders");
       }
       removeToast(t.id);
     },
@@ -275,14 +284,14 @@ export default function MainScreen({ session, onLogout }) {
   const requestNotifPermission = React.useCallback(() => {
     try {
       if (!("Notification" in window)) return;
-      if (Notification.permission === "default")
+      if (Notification.permission === "default") {
         Notification.requestPermission();
+      }
     } catch {
-      // Ignore notification permission errors
+      console.warn("Failed to request notification permission.");
     }
   }, []);
 
-  /* ------------------- ✅ SOCKET.IO realtime (GLOBAL) ------------------- */
   React.useEffect(() => {
     if (!userId || !businessId) {
       console.log("[socket] ⚠️ not connecting (missing ids)", {
@@ -321,8 +330,7 @@ export default function MainScreen({ session, onLogout }) {
 
     const onNotify = (data) => {
       console.log("[socket] 🔔 notify:", data);
-      if (isNewOrderNotify(data)) pushToast(data);
-      else pushToast(data);
+      pushToast(data);
     };
 
     const onOrderStatus = (data) =>
@@ -334,7 +342,6 @@ export default function MainScreen({ session, onLogout }) {
     s.on("connect", onConnect);
     s.on("disconnect", onDisconnect);
     s.on("connect_error", onConnectError);
-
     s.on("notify", onNotify);
     s.on("order:status", onOrderStatus);
 
@@ -349,7 +356,7 @@ export default function MainScreen({ session, onLogout }) {
         s.off("order:status", onOrderStatus);
         if (typeof s.offAny === "function") s.offAny(onAny);
       } catch {
-        // Ignore socket cleanup errors
+        console.warn("Failed to clean up socket event listeners.");
       }
       disconnectSocket();
     };
@@ -357,9 +364,7 @@ export default function MainScreen({ session, onLogout }) {
 
   return (
     <div className="app">
-      {/* Sidebar */}
       <aside className="side">
-        {/* ✅ Only business logo + business name */}
         <div className="sideHeader">
           <div className="sideBrandLogo" title={businessName}>
             {businessLogoUrl ? (
@@ -383,6 +388,7 @@ export default function MainScreen({ session, onLogout }) {
           {TABS.map((t) => {
             const Icon = t.icon;
             const isActive = active === t.id;
+
             return (
               <button
                 key={t.id}
@@ -394,7 +400,10 @@ export default function MainScreen({ session, onLogout }) {
                   try {
                     localStorage.setItem(ACTIVE_TAB_KEY, t.id);
                   } catch {
-                    // Ignore localStorage errors
+                    console.warn(
+                      "Failed to save active tab to localStorage:",
+                      t.id,
+                    );
                   }
                 }}
               >
@@ -422,9 +431,7 @@ export default function MainScreen({ session, onLogout }) {
         </div>
       </aside>
 
-      {/* Main */}
       <main className="main">
-        {/* ✅ Top bar: center address, right = full name then bigger profile */}
         <header className="top">
           <div className="topLeft">
             <div className="winBtns">
@@ -496,7 +503,6 @@ export default function MainScreen({ session, onLogout }) {
 
         <div className="panel">{renderContent()}</div>
 
-        {/* ✅ Floating Toasts (Global) */}
         <div className="toastWrap" aria-live="polite" aria-relevant="additions">
           {toasts.map((t) => (
             <div
@@ -543,12 +549,15 @@ export default function MainScreen({ session, onLogout }) {
             </div>
           ))}
         </div>
+
+        <GlobalChatWidget session={session} />
       </main>
     </div>
   );
 }
 
 /* ---------- icons ---------- */
+
 function HomeIcon() {
   return (
     <svg
@@ -676,8 +685,6 @@ function WalletIcon() {
     </svg>
   );
 }
-
-/* ✅ NEW graph icon */
 function GraphIcon() {
   return (
     <svg
@@ -699,7 +706,6 @@ function GraphIcon() {
         strokeWidth="2"
         strokeLinecap="round"
       />
-
       <path
         d="M6 15l4-4 3 3 5-6"
         stroke="currentColor"
@@ -707,7 +713,6 @@ function GraphIcon() {
         strokeLinejoin="round"
         strokeLinecap="round"
       />
-
       <path
         d="M10 11.2a.9.9 0 1 0 0-1.8.9.9 0 0 0 0 1.8Z"
         fill="currentColor"
@@ -720,7 +725,6 @@ function GraphIcon() {
     </svg>
   );
 }
-
 function UserIcon() {
   return (
     <svg

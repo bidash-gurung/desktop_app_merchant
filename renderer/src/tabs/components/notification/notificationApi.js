@@ -1,5 +1,3 @@
-// src/tabs/components/notification/notificationApi.js
-
 const API_TIMEOUT_MS = 20000;
 
 /* ===================== helpers ===================== */
@@ -8,6 +6,18 @@ function withTimeout(factory, ms = API_TIMEOUT_MS) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), ms);
   return Promise.resolve(factory(ctrl.signal)).finally(() => clearTimeout(t));
+}
+
+function mustPositiveInt(v, msg) {
+  const n = Number(v);
+  if (!Number.isFinite(n) || n <= 0) throw new Error(msg);
+  return n;
+}
+
+function mustStringId(v, msg) {
+  const s = String(v || "").trim();
+  if (!s) throw new Error(msg);
+  return s;
 }
 
 function pickMsg(json, fallback) {
@@ -72,20 +82,17 @@ async function fetchJson(url, { method = "GET", token, body } = {}) {
 }
 
 /* =========================================================
-   NOTIFICATIONS (matches your .env)
+   ORDER / BUSINESS NOTIFICATIONS
 ========================================================= */
 
 const NOTIFICATIONS_ENDPOINT = import.meta.env.VITE_NOTIFICATIONS_ENDPOINT;
-const SYSTEM_NOTIFS_ENDPOINT = import.meta.env
-  .VITE_SYSTEM_NOTIFICATIONS_ENDPOINT;
-
 const NOTIF_READ_ENDPOINT = import.meta.env.VITE_NOTIFICATION_READ_ENDPOINT;
 const NOTIF_READ_ALL_ENDPOINT = import.meta.env
   .VITE_NOTIFICATION_READ_ALL_ENDPOINT;
 const NOTIF_DELETE_ENDPOINT = import.meta.env.VITE_NOTIFICATION_DELETE_ENDPOINT;
 
 /**
- * ✅ GET business notifications
+ * GET business notifications
  */
 export async function listBusinessNotifications({
   business_id,
@@ -97,7 +104,7 @@ export async function listBusinessNotifications({
   if (!NOTIFICATIONS_ENDPOINT)
     throw new Error("VITE_NOTIFICATIONS_ENDPOINT missing in .env");
 
-  const bid = mustId(business_id, "business_id missing");
+  const bid = mustPositiveInt(business_id, "business_id missing");
 
   const baseUrl = fill(NOTIFICATIONS_ENDPOINT, {
     business_id: bid,
@@ -107,7 +114,7 @@ export async function listBusinessNotifications({
   const url = new URL(baseUrl);
   url.searchParams.set("limit", String(limit));
   url.searchParams.set("offset", String(offset));
-  if (unreadOnly) url.searchParams.set("unreadOnly", "1");
+  if (unreadOnly) url.searchParams.set("unreadOnly", "true");
 
   const json = await fetchJson(url.toString(), { token });
 
@@ -118,69 +125,47 @@ export async function listBusinessNotifications({
 }
 
 /**
- * ✅ GET system notifications
- * Your backend returns: { success:true, user_id:"58", count:23, notifications:[...] }
- */
-export async function listSystemNotifications({ user_id, token } = {}) {
-  if (!SYSTEM_NOTIFS_ENDPOINT)
-    throw new Error("VITE_SYSTEM_NOTIFICATIONS_ENDPOINT missing in .env");
-
-  const uid = mustId(user_id, "user_id missing");
-
-  const url = fill(SYSTEM_NOTIFS_ENDPOINT, { user_id: uid, userId: uid });
-
-  const json = await fetchJson(url, { token });
-
-  // ✅ FIX: support your backend response shape
-  if (Array.isArray(json)) return json;
-  if (Array.isArray(json?.notifications)) return json.notifications;
-  if (Array.isArray(json?.data)) return json.data;
-  if (Array.isArray(json?.rows)) return json.rows;
-  return [];
-}
-
-/**
- * ✅ POST mark one read
+ * PATCH mark one order notification as read
  */
 export async function markNotificationRead({ notificationId, token } = {}) {
   if (!NOTIF_READ_ENDPOINT)
     throw new Error("VITE_NOTIFICATION_READ_ENDPOINT missing in .env");
 
-  const id = mustId(notificationId, "notificationId missing");
+  const id = mustStringId(notificationId, "notificationId missing");
 
   const url = fill(NOTIF_READ_ENDPOINT, {
     notificationId: id,
     notification_id: id,
   });
 
-  return fetchJson(url, { method: "POST", token });
+  return fetchJson(url, { method: "PATCH", token });
 }
 
 /**
- * ✅ POST mark all read
+ * PATCH mark all order notifications as read
  */
 export async function markAllNotificationsRead({ businessId, token } = {}) {
   if (!NOTIF_READ_ALL_ENDPOINT)
     throw new Error("VITE_NOTIFICATION_READ_ALL_ENDPOINT missing in .env");
 
-  const bid = mustId(businessId, "businessId missing");
+  const bid = mustPositiveInt(businessId, "businessId missing");
 
   const url = fill(NOTIF_READ_ALL_ENDPOINT, {
     businessId: bid,
     business_id: bid,
   });
 
-  return fetchJson(url, { method: "POST", token });
+  return fetchJson(url, { method: "PATCH", token });
 }
 
 /**
- * ✅ DELETE notification
+ * DELETE order notification
  */
 export async function deleteNotification({ notificationId, token } = {}) {
   if (!NOTIF_DELETE_ENDPOINT)
     throw new Error("VITE_NOTIFICATION_DELETE_ENDPOINT missing in .env");
 
-  const id = mustId(notificationId, "notificationId missing");
+  const id = mustStringId(notificationId, "notificationId missing");
 
   const url = fill(NOTIF_DELETE_ENDPOINT, {
     notificationId: id,
@@ -191,7 +176,139 @@ export async function deleteNotification({ notificationId, token } = {}) {
 }
 
 /* =========================================================
-   FEEDBACK / RATINGS (matches your .env)
+   GENERAL / USER NOTIFICATIONS
+========================================================= */
+
+const USER_NOTIFICATIONS_ENDPOINT = import.meta.env
+  .VITE_USER_NOTIFICATIONS_ENDPOINT;
+const USER_NOTIF_READ_ENDPOINT = import.meta.env
+  .VITE_USER_NOTIFICATION_READ_ENDPOINT;
+const USER_NOTIF_DELETE_ENDPOINT = import.meta.env
+  .VITE_USER_NOTIFICATION_DELETE_ENDPOINT;
+const USER_NOTIF_READ_ALL_ENDPOINT = import.meta.env
+  .VITE_USER_NOTIFICATION_READ_ALL_ENDPOINT;
+
+/**
+ * GET user/general notifications
+ * Expected response:
+ * { success:true, count:n, data:[...] }
+ */
+export async function listUserNotifications({
+  user_id,
+  token,
+  limit = 200,
+  offset = 0,
+  unreadOnly = false,
+} = {}) {
+  if (!USER_NOTIFICATIONS_ENDPOINT)
+    throw new Error("VITE_USER_NOTIFICATIONS_ENDPOINT missing in .env");
+
+  const uid = mustPositiveInt(user_id, "user_id missing");
+
+  const baseUrl = fill(USER_NOTIFICATIONS_ENDPOINT, {
+    user_id: uid,
+    userId: uid,
+  });
+
+  const url = new URL(baseUrl);
+  url.searchParams.set("limit", String(limit));
+  url.searchParams.set("offset", String(offset));
+  if (unreadOnly) url.searchParams.set("unreadOnly", "true");
+
+  const json = await fetchJson(url.toString(), { token });
+
+  if (Array.isArray(json)) return json;
+  if (Array.isArray(json?.data)) return json.data;
+  if (Array.isArray(json?.rows)) return json.rows;
+  if (Array.isArray(json?.notifications)) return json.notifications;
+  return [];
+}
+
+/**
+ * PATCH mark one user/general notification as read
+ * Here notification id is numeric from sample response
+ */
+export async function markUserNotificationRead({ notificationId, token } = {}) {
+  if (!USER_NOTIF_READ_ENDPOINT)
+    throw new Error("VITE_USER_NOTIFICATION_READ_ENDPOINT missing in .env");
+
+  const id = mustPositiveInt(notificationId, "notificationId missing");
+
+  const url = fill(USER_NOTIF_READ_ENDPOINT, {
+    notificationId: id,
+    notification_id: id,
+    id,
+  });
+
+  return fetchJson(url, { method: "PATCH", token });
+}
+
+/**
+ * PATCH mark all user/general notifications as read
+ */
+export async function markAllUserNotificationsRead({ user_id, token } = {}) {
+  if (!USER_NOTIF_READ_ALL_ENDPOINT)
+    throw new Error("VITE_USER_NOTIFICATION_READ_ALL_ENDPOINT missing in .env");
+
+  const uid = mustPositiveInt(user_id, "user_id missing");
+
+  const url = fill(USER_NOTIF_READ_ALL_ENDPOINT, {
+    user_id: uid,
+    userId: uid,
+  });
+
+  return fetchJson(url, { method: "PATCH", token });
+}
+
+/**
+ * DELETE user/general notification
+ */
+export async function deleteUserNotification({ notificationId, token } = {}) {
+  if (!USER_NOTIF_DELETE_ENDPOINT)
+    throw new Error("VITE_USER_NOTIFICATION_DELETE_ENDPOINT missing in .env");
+
+  const id = mustPositiveInt(notificationId, "notificationId missing");
+
+  const url = fill(USER_NOTIF_DELETE_ENDPOINT, {
+    notificationId: id,
+    notification_id: id,
+    id,
+  });
+
+  return fetchJson(url, { method: "DELETE", token });
+}
+
+/* =========================================================
+   SYSTEM NOTIFICATIONS
+========================================================= */
+
+const SYSTEM_NOTIFS_ENDPOINT = import.meta.env
+  .VITE_SYSTEM_NOTIFICATIONS_ENDPOINT;
+
+/**
+ * GET system notifications
+ * backend returns:
+ * { success:true, user_id:"58", count:23, notifications:[...] }
+ */
+export async function listSystemNotifications({ user_id, token } = {}) {
+  if (!SYSTEM_NOTIFS_ENDPOINT)
+    throw new Error("VITE_SYSTEM_NOTIFICATIONS_ENDPOINT missing in .env");
+
+  const uid = mustPositiveInt(user_id, "user_id missing");
+
+  const url = fill(SYSTEM_NOTIFS_ENDPOINT, { user_id: uid, userId: uid });
+
+  const json = await fetchJson(url, { token });
+
+  if (Array.isArray(json)) return json;
+  if (Array.isArray(json?.notifications)) return json.notifications;
+  if (Array.isArray(json?.data)) return json.data;
+  if (Array.isArray(json?.rows)) return json.rows;
+  return [];
+}
+
+/* =========================================================
+   FEEDBACK / RATINGS
 ========================================================= */
 
 const FEEDBACK_ENDPOINT = import.meta.env.VITE_FEEDBACK_ENDPOINT;
@@ -207,7 +324,7 @@ const FEEDBACK_LIKE_ENDPOINT = import.meta.env.VITE_FEEDBACK_LIKE_ENDPOINT;
 const FEEDBACK_UNLIKE_ENDPOINT = import.meta.env.VITE_FEEDBACK_UNLIKE_ENDPOINT;
 
 /**
- * ✅ NotificationsPage expects: { rows, meta }
+ * NotificationsPage expects: { rows, meta }
  */
 export async function listFeedbacksWithMeta({
   business_id,
@@ -234,7 +351,7 @@ export async function listFeedbacksWithMeta({
 }
 
 /**
- * ✅ POST reply
+ * POST reply
  */
 export async function sendFeedbackReply({
   rating_id,
@@ -261,7 +378,7 @@ export async function sendFeedbackReply({
 }
 
 /**
- * ✅ DELETE reply
+ * DELETE reply
  */
 export async function deleteFeedbackReply({
   reply_id,
@@ -284,7 +401,7 @@ export async function deleteFeedbackReply({
 }
 
 /**
- * ✅ REPORT feedback
+ * REPORT feedback
  */
 export async function reportFeedback({ type, rating_id, reason, token } = {}) {
   if (!FEEDBACK_REPORT_ENDPOINT)
@@ -300,7 +417,7 @@ export async function reportFeedback({ type, rating_id, reason, token } = {}) {
 }
 
 /**
- * ✅ REPORT reply
+ * REPORT reply
  */
 export async function reportFeedbackReply({
   type,
@@ -324,7 +441,7 @@ export async function reportFeedbackReply({
 }
 
 /**
- * ✅ LIKE / UNLIKE
+ * LIKE / UNLIKE
  */
 export async function likeRating({ type, rating_id, token } = {}) {
   if (!FEEDBACK_LIKE_ENDPOINT)

@@ -925,3 +925,64 @@
     padding-bottom: 12px;
   }
 }
+.ntDataCard {
+  margin-top: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  background: #fff;
+  padding: 14px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+.ntDataCardTitle {
+  font-size: 14px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  color: #111827;
+}
+
+.ntInfoGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.ntInfoRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.ntInfoLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.ntInfoValue {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: right;
+  word-break: break-word;
+}
+
+.ntInfoValue.success {
+  color: #15803d;
+}
+
+.ntInfoValue.danger {
+  color: #b91c1c;
+}
+
+.ntJsonBlock {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 12px;
+  line-height: 1.5;
+}

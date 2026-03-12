@@ -1,4 +1,3 @@
-// src/tabs/components/notification/NotificationCard.jsx
 import React, { useMemo } from "react";
 import { fmtDateTime, isUnread, safeText, toneFromType } from "./utils";
 
@@ -8,7 +7,7 @@ function Pill({ tone = "neutral", text }) {
 
 export default function NotificationCard({
   item,
-  kind, // "orders" | "system"
+  kind, // "general" | "orders" | "system"
   busy,
   onOpen,
   onMarkRead,
@@ -17,14 +16,32 @@ export default function NotificationCard({
   showReply = false,
 }) {
   const tone = useMemo(() => toneFromType(item), [item]);
+  const unread = useMemo(() => isUnread(item), [item]);
 
-  const unread = kind === "orders" ? isUnread(item) : false;
-
-  const title = safeText(item?.title);
+  const title = safeText(item?.title, "Notification");
   const body = safeText(item?.body_preview || item?.message, "");
   const created = fmtDateTime(
     item?.created_at || item?.sent_at || item?.createdAt,
   );
+
+  const orderId =
+    item?.order_id ||
+    (() => {
+      try {
+        const raw = item?.data;
+        if (!raw) return null;
+        const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+        return parsed?.order_id || null;
+      } catch {
+        return null;
+      }
+    })();
+
+  const rightLabel =
+    kind === "general" ? "General" : kind === "system" ? "System" : "Order";
+
+  const canMarkRead = (kind === "general" || kind === "orders") && unread;
+  const canDelete = kind === "general" || kind === "orders";
 
   return (
     <div className={`ntCard ${unread ? "isUnread" : ""}`}>
@@ -33,8 +50,7 @@ export default function NotificationCard({
           <div className="ntCardTitle">{title}</div>
 
           <div className="ntCardRight">
-            {/* ✅ ONLY orders show unread/read */}
-            {kind === "orders" ? (
+            {kind === "general" || kind === "orders" ? (
               unread ? (
                 <Pill tone="warn" text="Unread" />
               ) : (
@@ -42,19 +58,16 @@ export default function NotificationCard({
               )
             ) : null}
 
-            {/* type pill */}
-            <Pill tone={tone} text={kind === "system" ? "System" : "Order"} />
+            <Pill tone={tone} text={rightLabel} />
           </div>
         </div>
 
         <div className="ntCardMeta">
           <span className="ntMetaItem">Date: {created}</span>
 
-          {kind === "orders" && item?.order_id ? (
-            <span className="ntMetaItem">Order: {safeText(item.order_id)}</span>
+          {orderId ? (
+            <span className="ntMetaItem">Order: {safeText(orderId)}</span>
           ) : null}
-
-          {/* ✅ Removed ID for both system + order */}
         </div>
       </div>
 
@@ -70,8 +83,7 @@ export default function NotificationCard({
           View
         </button>
 
-        {/* ✅ Orders only actions */}
-        {kind === "orders" && unread ? (
+        {canMarkRead ? (
           <button
             type="button"
             className="ntBtn"
@@ -93,8 +105,7 @@ export default function NotificationCard({
           </button>
         ) : null}
 
-        {/* ✅ Orders only: delete */}
-        {kind === "orders" ? (
+        {canDelete ? (
           <button
             type="button"
             className="ntBtn ntBtnDanger"

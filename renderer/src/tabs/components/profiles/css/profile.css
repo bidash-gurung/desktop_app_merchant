@@ -1,0 +1,636 @@
+/* src/tabs/components/profiles/profile.css */
+
+.pfPage {
+  width: 100%;
+  max-width: 1250px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: #0f172a;
+}
+
+.pfNotice {
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.pfNotice.success {
+  background: #ecfdf3;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.pfNotice.error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.pfGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.8fr);
+  gap: 12px;
+}
+
+.pfLeftCol,
+.pfRightCol {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pfHeroCard,
+.pfCard {
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+  border-radius: 20px;
+}
+
+.pfHeroCard {
+  padding: 16px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  min-height: 104px;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(106, 0, 235, 0.06),
+      transparent 28%
+    ),
+    linear-gradient(180deg, #ffffff 0%, #fcfbff 100%);
+}
+
+.pfHeroLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.pfAvatarWrap {
+  flex: 0 0 auto;
+}
+
+.pfAvatarBtn {
+  position: relative;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.pfAvatar,
+.pfAvatarFallback {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #f1e8ff;
+  box-shadow: 0 6px 16px rgba(106, 0, 235, 0.1);
+}
+
+.pfAvatarFallback {
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #6a00eb 0%, #8b5cf6 100%);
+  color: #fff;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.pfAvatarOverlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.38);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+
+.pfAvatarBtn:hover .pfAvatarOverlay {
+  opacity: 1;
+}
+
+.pfHeroMeta {
+  min-width: 0;
+}
+
+.pfEyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7c3aed;
+  margin-bottom: 4px;
+}
+
+.pfHeroName {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1.1;
+  word-break: break-word;
+}
+
+.pfHeroSub {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pfStatusRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.pfBadge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  border: 1px solid transparent;
+}
+
+.pfBadge.ok {
+  background: #ecfdf3;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+
+.pfBadge.warn {
+  background: #fff7ed;
+  color: #9a3412;
+  border-color: #fed7aa;
+}
+
+.pfBadge.danger {
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+.pfBadge.neutral {
+  background: #f8fafc;
+  color: #334155;
+  border-color: #e2e8f0;
+}
+
+.pfHeroRight {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.pfHeroActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.pfUploadBtn,
+.pfPrimaryBtn,
+.pfGhostBtn,
+.pfSmallBtn {
+  border: 0;
+  outline: 0;
+  cursor: pointer;
+  border-radius: 12px;
+  font-weight: 800;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease;
+  height: 40px;
+  padding: 0 14px;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.pfUploadBtn,
+.pfPrimaryBtn,
+.pfSmallBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #6a00eb;
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(106, 0, 235, 0.18);
+}
+
+.pfUploadBtn {
+  min-width: 124px;
+}
+
+.pfPrimaryBtn {
+  min-width: 130px;
+}
+
+.pfSmallBtn {
+  min-width: 110px;
+  height: 34px;
+  font-size: 12px;
+  padding: 0 12px;
+}
+
+.pfGhostBtn {
+  min-width: 92px;
+  background: #f8fafc;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+}
+
+.pfUploadBtn:hover,
+.pfPrimaryBtn:hover,
+.pfGhostBtn:hover,
+.pfSmallBtn:hover {
+  transform: translateY(-1px);
+}
+
+.pfUploadBtn:disabled,
+.pfPrimaryBtn:disabled,
+.pfGhostBtn:disabled,
+.pfSmallBtn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pfCard {
+  padding: 16px;
+}
+
+.pfCardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.pfCardHeadCompact {
+  margin-bottom: 10px;
+  margin-top: 2px;
+}
+
+.pfCardTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.pfSectionTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.pfCardSub {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.pfStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pfStatBox {
+  border: 1px solid #edf2f7;
+  background: #fafbff;
+  border-radius: 16px;
+  padding: 12px;
+}
+
+.pfStatBoxFull {
+  grid-column: 1 / -1;
+}
+
+.pfStatLabel {
+  font-size: 11px;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.pfStatValue {
+  margin-top: 8px;
+  font-size: 17px;
+  font-weight: 900;
+  color: #0f172a;
+  word-break: break-word;
+}
+
+.pfForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pfFieldGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.pfFieldGrid.single {
+  grid-template-columns: 1fr;
+}
+
+.pfField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pfFieldFull {
+  grid-column: 1 / -1;
+}
+
+.pfLabel {
+  font-size: 12px;
+  font-weight: 800;
+  color: #334155;
+}
+
+.pfInput {
+  width: 100%;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid #dbe4ee;
+  background: #ffffff;
+  padding: 0 13px;
+  font-size: 13px;
+  color: #0f172a;
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+  box-sizing: border-box;
+}
+
+.pfInput:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+}
+
+.pfInputReadonly {
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.pfActions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.pfLoadingWrap,
+.pfEmptyWrap {
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+}
+
+.pfLoadingText,
+.pfEmptyText {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* business media */
+.pfBizMediaGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.pfMediaCard {
+  border: 1px solid #edf2f7;
+  background: #fafbff;
+  border-radius: 16px;
+  padding: 12px;
+}
+
+.pfMediaHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.pfMediaTitle {
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.pfMediaPreview {
+  width: 100%;
+  height: 170px;
+  border: 1px dashed #dbe4ee;
+  border-radius: 14px;
+  background: #fff;
+  cursor: pointer;
+  overflow: hidden;
+  padding: 0;
+}
+
+.pfMediaImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pfMediaEmpty {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pfSectionDivider {
+  height: 1px;
+  background: #edf2f7;
+  margin: 2px 0;
+}
+
+/* image modal */
+.pfImageModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  z-index: 9999;
+}
+
+.pfImageModalCard {
+  position: relative;
+  max-width: min(90vw, 720px);
+  max-height: 88vh;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+.pfImageModalImg {
+  display: block;
+  max-width: 100%;
+  max-height: 88vh;
+  object-fit: contain;
+  background: #fff;
+}
+
+.pfImageModalClose {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.78);
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 2;
+}
+
+@media (max-width: 1100px) {
+  .pfGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .pfHeroCard {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pfHeroLeft {
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .pfHeroRight {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .pfHeroActions {
+    justify-content: flex-start;
+  }
+
+  .pfFieldGrid,
+  .pfStatsGrid,
+  .pfBizMediaGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .pfActions {
+    justify-content: stretch;
+  }
+
+  .pfPrimaryBtn {
+    width: 100%;
+  }
+}
+.pfInputWithAction {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.pfInlineActionBtn {
+  white-space: nowrap;
+}
+
+.pfMapModalCard {
+  position: relative;
+  width: min(960px, 94vw);
+  max-height: 90vh;
+  overflow: auto;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  padding: 18px;
+}
+
+.pfMapModalHead {
+  margin-bottom: 12px;
+}
+
+.pfMapWrap {
+  border: 1px solid #edf2f7;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.pfLeafletMap {
+  width: 100%;
+  height: 420px;
+}
+
+.pfMapInfoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.pfMapActions {
+  gap: 10px;
+  margin-top: 12px;
+}
+
+@media (max-width: 760px) {
+  .pfInputWithAction,
+  .pfMapInfoGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .pfLeafletMap {
+    height: 320px;
+  }
+}

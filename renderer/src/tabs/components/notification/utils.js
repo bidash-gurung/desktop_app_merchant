@@ -1,13 +1,20 @@
-// src/tabs/components/notification/utils.js
-
 /* ===================== basic ===================== */
-export function safeText(v) {
+export function safeText(v, fallback = "—") {
   const s = String(v ?? "").trim();
-  return s ? s : "—";
+  return s ? s : fallback;
 }
 
 export function isUnread(n) {
-  return Number(n?.is_read ?? 0) === 0;
+  if (!n || typeof n !== "object") return false;
+
+  if ("is_read" in n) return Number(n.is_read ?? 0) === 0;
+
+  const status = String(n.status || "")
+    .trim()
+    .toLowerCase();
+  if (status) return status === "unread";
+
+  return false;
 }
 
 /* ===================== ids / types ===================== */
@@ -17,7 +24,7 @@ export function pickFeedbackId(fb) {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-/** strict: only food | mart (prevents backend "Invalid rating type") */
+/** strict: only food | mart */
 export function safeType(type, fallback = "food") {
   const t = String(type || "")
     .trim()
@@ -70,28 +77,22 @@ export function normalizeFeedback(raw) {
   return {
     ...fb,
 
-    // ids
     id,
     rating_id: fb.rating_id ?? fb.id ?? fb.notification_id ?? null,
 
-    // types
     owner_type: fb.owner_type || fb.type || fb.rating_type || "",
     rating_type: fb.rating_type || fb.owner_type || fb.type || "",
 
-    // content
     rating: fb.rating ?? fb.stars ?? null,
     comment: fb.comment ?? fb.message ?? fb.text ?? "",
     likes_count: Number(fb.likes_count ?? fb.likes ?? 0),
 
-    // time
     created_at: fb.created_at ?? fb.ts ?? fb.date ?? null,
     hours_ago: fb.hours_ago ?? null,
 
-    // user (flattened helpers used by some UIs)
     user_name: user.user_name ?? fb.user_name ?? fb.customer_name ?? null,
     profile_image: user.profile_image ?? fb.profile_image ?? null,
 
-    // replies
     replies: Array.isArray(fb.replies) ? fb.replies : [],
     reply_count:
       Number(
@@ -110,16 +111,13 @@ export function normalizeReply(raw) {
     id: r.id ?? r.reply_id ?? null,
     reply_id: r.reply_id ?? r.id ?? null,
 
-    // message text (different backends may use different field names)
     text: r.text ?? r.message ?? r.reply ?? "",
     message: r.text ?? r.message ?? r.reply ?? "",
 
-    // time
     ts: r.ts ?? r.created_at ?? null,
     created_at: r.created_at ?? r.ts ?? null,
     hours_ago: r.hours_ago ?? null,
 
-    // user (flatten for UI)
     user_id: r.user_id ?? user.user_id ?? null,
     user_name: user.user_name ?? r.user_name ?? null,
     profile_image: user.profile_image ?? r.profile_image ?? null,
@@ -133,17 +131,21 @@ export function starsText(n) {
 }
 
 /** used by NotificationCard.jsx */
-export function toneFromType(type) {
-  const t = String(type || "")
-    .trim()
-    .toLowerCase();
+export function toneFromType(value) {
+  const raw =
+    typeof value === "object"
+      ? value?.type || value?.status || value?.title || ""
+      : value || "";
+
+  const t = String(raw).trim().toLowerCase();
 
   if (
     t === "success" ||
     t === "ok" ||
     t === "paid" ||
     t === "completed" ||
-    t === "delivered"
+    t === "delivered" ||
+    t.includes("success")
   )
     return "success";
 
@@ -152,7 +154,8 @@ export function toneFromType(type) {
     t === "warning" ||
     t === "pending" ||
     t === "scheduled" ||
-    t === "expired"
+    t === "expired" ||
+    t.includes("wallet_update")
   )
     return "warn";
 
